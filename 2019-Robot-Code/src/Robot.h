@@ -7,11 +7,16 @@
 
 #pragma once
 
+#include <memory>
+
 #include <string>
 
 #include <IterativeRobot.h>
 #include <SmartDashboard/SendableChooser.h>
 #include <SerialPort.h>
+
+class DriveTrain;
+class Input;
 
 class Robot : public frc::IterativeRobot {
 public:
@@ -27,4 +32,7 @@ private:
 	const std::string kAutoNameDefault = "Default";
 	const std::string kAutoNameCustom = "My Auto";
 	std::string m_autoSelected;
+
+	std::unique_ptr< DriveTrain > m_driveTrain;
+	std::unique_ptr< Input > m_input;
 };

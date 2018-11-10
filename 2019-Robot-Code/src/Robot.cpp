@@ -7,11 +7,15 @@
 
 #include "Robot.h"
 
+#include "subsystems/DriveTrain.h"
+#include "subsystems/Input.h"
+
 #include <iostream>
 
 #include <SmartDashboard/SmartDashboard.h>
 
 #include <Timer.h>
+
 
 
 frc::SerialPort port(9600, frc::SerialPort::Port::kUSB);
@@ -20,6 +24,9 @@ void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+
+	driveTrain = std::make_unique< DriveTrain >(3, 4, 2, 1);
+	input = std::make_unique< Input >();
 }
 
 /**
@@ -61,17 +68,12 @@ void Robot::TeleopPeriodic() {
 
 	port.Write("testmessage");
 
-	/*frc::Timer timer;
-
-	timer.Start();
-
-	while (!timer.HasPeriodPassed(0.001)) {
-
-	}*/
-
 	char buffer[256] = { 0 };
 	std::cout << "Read " << port.Read((char*)buffer, 255) << " bytes\n";
 	std::cout << "Result: " << buffer << "\n";
+
+	m_driveTrain->drive(m_input->getInput());
+
 }
 
 void Robot::TestPeriodic() {}
