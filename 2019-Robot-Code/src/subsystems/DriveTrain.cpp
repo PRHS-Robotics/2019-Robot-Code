@@ -12,11 +12,10 @@ DriveTrain::DriveTrain(int frontLeft, int backLeft, int frontRight, int backRigh
 	m_frontRight(frontRight),
 	m_backLeft(backLeft),
 	m_backRight(backRight),
-	m_lMotors(frontLeft, backLeft),
-	m_rMotors(frontRight, backRight),
-	m_drive(m_lMotors, m_rMotors)
+	m_drive(m_frontLeft, m_frontRight)
 {
-
+	m_backLeft.Follow(m_frontLeft);
+	m_backRight.Follow(m_frontRight);
 }
 
 void DriveTrain::drive(InputState state) {

@@ -16,17 +16,14 @@
 
 #include <Timer.h>
 
-
-
-frc::SerialPort port(9600, frc::SerialPort::Port::kUSB);
-
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 
-	driveTrain = std::make_unique< DriveTrain >(3, 4, 2, 1);
-	input = std::make_unique< Input >();
+	m_driveTrain = std::make_unique< DriveTrain >(3, 4, 2, 1);
+	m_input = std::make_unique< Input >(1, 2);
+	m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
 }
 
 /**
@@ -66,10 +63,10 @@ void Robot::TeleopInit() {
 
 void Robot::TeleopPeriodic() {
 
-	port.Write("testmessage");
+	m_serialPort->Write("testmessage");
 
 	char buffer[256] = { 0 };
-	std::cout << "Read " << port.Read((char*)buffer, 255) << " bytes\n";
+	std::cout << "Read " << m_serialPort->Read((char*)buffer, 255) << " bytes\n";
 	std::cout << "Result: " << buffer << "\n";
 
 	m_driveTrain->drive(m_input->getInput());

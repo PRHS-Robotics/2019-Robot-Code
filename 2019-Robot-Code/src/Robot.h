@@ -35,4 +35,5 @@ private:
 
 	std::unique_ptr< DriveTrain > m_driveTrain;
 	std::unique_ptr< Input > m_input;
+	std::unique_ptr< frc::SerialPort > m_serialPort;
 };

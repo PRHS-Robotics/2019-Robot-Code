@@ -10,7 +10,9 @@
 
 #include "subsystems/Input.h"
 
-#include <Talon.h>
+#include <memory>
+
+#include <ctre/Phoenix.h>
 #include <SpeedControllerGroup.h>
 #include <Drive/DifferentialDrive.h>
 
@@ -23,15 +25,10 @@ public:
 
 private:
 
-	frc::Talon m_frontLeft;
-	frc::Talon m_frontRight;
-	frc::Talon m_backLeft;
-	frc::Talon m_backRight;
-
-	frc::SpeedControllerGroup m_lMotors;
-	frc::SpeedControllerGroup m_rMotors;
+	WPI_TalonSRX m_frontLeft, m_backLeft, m_frontRight, m_backRight;
 
 	frc::DifferentialDrive m_drive;
+
 };
 
 
