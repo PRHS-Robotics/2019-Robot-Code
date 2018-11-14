@@ -16,6 +16,9 @@ DriveTrain::DriveTrain(int frontLeft, int backLeft, int frontRight, int backRigh
 {
 	m_backLeft.Follow(m_frontLeft);
 	m_backRight.Follow(m_frontRight);
+
+	m_backLeft.SetInverted(invert_back);
+	m_backRight.SetInverted(invert_back);
 }
 
 void DriveTrain::drive(InputState state) {

@@ -25,9 +25,11 @@ public:
 
 private:
 
-	WPI_TalonSRX m_frontLeft, m_backLeft, m_frontRight, m_backRight;
+	WPI_TalonSRX m_frontLeft, m_frontRight, m_backLeft, m_backRight;
 
 	frc::DifferentialDrive m_drive;
+
+	const static bool invert_back = false;
 
 };
 
