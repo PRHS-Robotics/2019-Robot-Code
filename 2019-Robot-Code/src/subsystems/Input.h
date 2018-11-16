@@ -15,6 +15,8 @@ struct InputState {
 	double x, y, r;
 };
 
+double applyDeadzone(double value, double deadzoneRange);
+
 class Input {
 public:
 
@@ -25,6 +27,8 @@ public:
 private:
 	frc::Joystick primary;
 	frc::XboxController secondary;
+
+	constexpr const static double deadzone = 0.1;
 };
 
 

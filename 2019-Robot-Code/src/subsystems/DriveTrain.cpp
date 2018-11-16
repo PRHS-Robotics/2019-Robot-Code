@@ -6,23 +6,28 @@
  */
 
 #include "subsystems/DriveTrain.h"
+#include <iostream>
 
-DriveTrain::DriveTrain(int frontLeft, int backLeft, int frontRight, int backRight) :
+DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight, int midRight, int backRight) :
 	m_frontLeft(frontLeft),
-	m_frontRight(frontRight),
+	m_midLeft(midLeft),
 	m_backLeft(backLeft),
+	m_frontRight(frontRight),
+	m_midRight(midRight),
 	m_backRight(backRight),
 	m_drive(m_frontLeft, m_frontRight)
 {
+	m_midLeft.Follow(m_frontLeft);
 	m_backLeft.Follow(m_frontLeft);
-	m_backRight.Follow(m_frontRight);
 
-	m_backLeft.SetInverted(invert_back);
-	m_backRight.SetInverted(invert_back);
+	m_midRight.Follow(m_frontRight);
+	m_backRight.Follow(m_frontRight);
 }
 
 void DriveTrain::drive(InputState state) {
-	double lSpeed = state.r + state.y;
-	double rSpeed = state.r - state.y;
-	m_drive.TankDrive(lSpeed, rSpeed);
+	double lSpeed = -state.y + state.r;
+	double rSpeed = -state.y - state.r;
+	/*std::cout << "x: " << state.x << ", y: " << state.y << ", z: " << state.r << "\n";
+	std::cout << "lSpeed: " << lSpeed << ", rSpeed: " << rSpeed << "\n";*/
+	m_drive.TankDrive(-lSpeed, -rSpeed, false);
 }
