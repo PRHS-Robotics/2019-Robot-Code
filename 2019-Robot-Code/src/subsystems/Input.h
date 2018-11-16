@@ -22,7 +22,10 @@ public:
 
 	Input(int primaryPort, int secondaryPort);
 
+	InputState getRawInput();
+
 	InputState getInput();
+
 
 private:
 	frc::Joystick primary;

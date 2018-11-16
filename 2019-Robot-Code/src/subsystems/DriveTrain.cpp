@@ -27,7 +27,5 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 void DriveTrain::drive(InputState state) {
 	double lSpeed = -state.y + state.r;
 	double rSpeed = -state.y - state.r;
-	/*std::cout << "x: " << state.x << ", y: " << state.y << ", z: " << state.r << "\n";
-	std::cout << "lSpeed: " << lSpeed << ", rSpeed: " << rSpeed << "\n";*/
 	m_drive.TankDrive(-lSpeed, -rSpeed, false);
 }

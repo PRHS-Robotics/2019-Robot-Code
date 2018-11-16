@@ -25,12 +25,16 @@ Input::Input(int primaryPort, int secondaryPort) :
 
 }
 
+InputState Input::getRawInput() {
+	return InputState{ primary.GetX(), primary.GetY(), primary.GetZ() };
+}
+
 InputState Input::getInput() {
-	double x = applyDeadzone(primary.GetX(), deadzone);
-	double y = applyDeadzone(primary.GetY(), deadzone);
-	double z = applyDeadzone(primary.GetZ(), deadzone);
-	if (std::abs(z) <= 0.2 * (std::abs(x) + std::abs(y))) {
-		z = 0;
-	}
-	return InputState{ x, y, z };
+	InputState rawState = getRawInput();
+	double x = applyDeadzone(rawState.x, deadzone);
+	double y = applyDeadzone(rawState.y, deadzone);
+
+	// Increase twist-axis deadzone when the stick is far from the center to prevent accidental turning
+	double r = applyDeadzone(rawState.r, 2.0 * deadzone * (std::abs(x) + std::abs(y)));
+	return InputState{ x, y, r };
 }
