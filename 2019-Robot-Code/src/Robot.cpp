@@ -21,7 +21,7 @@ void Robot::RobotInit() {
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 
-	m_driveTrain = std::make_unique< DriveTrain >(1, 5, 2, 3, 6, 4);
+	m_driveTrain = std::make_unique< DriveTrain >(1, 2, 3, 4, 5, 6);
 	m_input = std::make_unique< Input >(1, 2);
 	m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
 }
