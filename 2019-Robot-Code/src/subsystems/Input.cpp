@@ -35,6 +35,6 @@ InputState Input::getInput() {
 	double y = applyDeadzone(rawState.y, deadzone);
 
 	// Increase twist-axis deadzone when the stick is far from the center to prevent accidental turning
-	double r = applyDeadzone(rawState.r, 2.0 * deadzone * (std::abs(x) + std::abs(y)));
+	double r = applyDeadzone(rawState.r, 2.0 * deadzone * (1 + 0.5 *(std::abs(x) + std::abs(y))));
 	return InputState{ x, y, r };
 }

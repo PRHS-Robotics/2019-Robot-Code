@@ -27,5 +27,5 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 void DriveTrain::drive(InputState state) {
 	double lSpeed = -state.y + state.r;
 	double rSpeed = -state.y - state.r;
-	m_drive.TankDrive(-lSpeed, -rSpeed, false);
+	m_drive.TankDrive(-lSpeed, -rSpeed);
 }
