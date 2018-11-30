@@ -17,6 +17,14 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_backRight(backRight),
 	m_drive(m_frontLeft, m_frontRight)
 {
+	m_frontLeft.ConfigVoltageCompSaturation(11.0, 10);
+	m_frontLeft.EnableVoltageCompensation(true);
+	m_frontLeft.ConfigVoltageMeasurementFilter(32, 10);
+
+	m_frontRight.ConfigVoltageCompSaturation(11.0, 10);
+	m_frontRight.EnableVoltageCompensation(true);
+	m_frontRight.ConfigVoltageMeasurementFilter(32, 10);
+
 	m_midLeft.Follow(m_frontLeft);
 	m_backLeft.Follow(m_frontLeft);
 
