@@ -15,6 +15,7 @@
 #include <ctre/Phoenix.h>
 #include <SpeedControllerGroup.h>
 #include <Drive/DifferentialDrive.h>
+#include <Solenoid.h>
 
 class DriveTrain {
 public:
@@ -23,7 +24,19 @@ public:
 
 	void drive(InputState state);
 
+	void drive(double leftSpeed, double rightSpeed);
+
+	void resetSensors();
+
 private:
+
+	void calibratePhase(double leftSpeed, double rightSpeed);
+
+	bool leftSidePhase() const;
+	void setLeftSidePhase(bool phase);
+
+	bool rightSidePhase() const;
+	void setRightSidePhase(bool phase);
 
 	WPI_TalonSRX m_frontLeft;
 	WPI_TalonSRX m_midLeft;
@@ -33,7 +46,10 @@ private:
 	WPI_TalonSRX m_midRight;
 	WPI_TalonSRX m_backRight;
 
-	frc::DifferentialDrive m_drive;
+	WPI_TalonSRX m_arm;
+
+	frc::Solenoid m_shiftFast;
+	frc::Solenoid m_shiftSlow;
 };
 
 
