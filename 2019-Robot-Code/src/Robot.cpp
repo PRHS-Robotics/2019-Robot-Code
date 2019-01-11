@@ -15,7 +15,11 @@
 
 #include <SmartDashboard/SmartDashboard.h>
 
+/* --- Robot.cpp --- */
 #include <Timer.h>
+
+#include "Robot.h"
+#include <SmartDashboard/SmartDashboard.h>
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);

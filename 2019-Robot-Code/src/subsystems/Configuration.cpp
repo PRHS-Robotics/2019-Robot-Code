@@ -9,9 +9,10 @@
 #include <SmartDashboard/SmartDashboard.h>
 
 template < typename T >
-Option<T>::Option(std::string displayName, const T& defaultValue) :
+Option<T>::Option(std::string displayName, const T& defaultValue, validator_type validator) :
 	m_displayName(displayName),
-	m_defaultValue(defaultValue)
+	m_defaultValue(defaultValue)/*,
+	m_validator(validator)*/
 {
 
 }

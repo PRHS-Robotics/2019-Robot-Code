@@ -12,14 +12,17 @@
 
 template < typename T >
 struct Option {
+	typedef bool validator_type(const T& value);
+
 	std::string m_displayName;
 	const T& m_defaultValue;
+	validator_type m_validator;
 
 	Option() = delete;
 	Option(const Option&) = delete;
 	Option(Option&&) = default;
 
-	Option(std::string displayName, const T& defaultValue);
+	Option(std::string displayName, const T& defaultValue, validator_type validator);
 
 	T get() const;
 };

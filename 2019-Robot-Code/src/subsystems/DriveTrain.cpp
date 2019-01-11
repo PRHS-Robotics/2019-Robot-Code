@@ -78,7 +78,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 
 	m_frontLeft.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
 	m_frontLeft.Config_kF(0, 15.57, 10);
-	m_frontLeft.Config_kP(0, 17.05, 10);
+	m_frontLeft.Config_kP(0, 17.05 / 2.0, 10);
 	m_frontLeft.Config_kI(0, 0, 10);
 	m_frontLeft.Config_kD(0, 0, 10);
 	/*m_frontLeft.Config_kF(0, 6.434, 10);
@@ -94,7 +94,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 
 	m_frontRight.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
 	m_frontRight.Config_kF(0, 15.57, 10);
-	m_frontRight.Config_kP(0, 17.05, 10);
+	m_frontRight.Config_kP(0, 17.05 / 2.0, 10);
 	m_frontRight.Config_kI(0, 0, 10);
 	m_frontRight.Config_kD(0, 0, 10);
 	/*m_frontRight.Config_kF(0, 6.434, 10);
