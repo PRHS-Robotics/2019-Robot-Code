@@ -20,17 +20,19 @@ std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
 
-void Robot::RobotInit() {
-  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
-  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+std::unique_ptr< Arm > Robot::m_arm{};
 
-  m_driveTrain = std::make_unique< DriveTrain >(1, 2, 3, 4, 5, 6);
+std::unique_ptr< ManualArm > Robot::m_manualArm{};
+
+void Robot::RobotInit() {
+  m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
   m_input = std::make_unique< Input >(1, 2);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
+
+  m_arm = std::make_unique< Arm >(1, 1, 2, 2);
 }
 
 /**
@@ -41,7 +43,12 @@ void Robot::RobotInit() {
  * <p> This runs after the mode specific periodic functions, but before
  * LiveWindow and SmartDashboard integrated updating.
  */
-void Robot::RobotPeriodic() {}
+void Robot::RobotPeriodic() {
+  auto armSensors = m_arm->getSensorValues();
+
+  frc::SmartDashboard::PutNumber("Arm Base Analog", armSensors.first);
+  frc::SmartDashboard::PutNumber("Arm Wrist Analog", armSensors.second);
+}
 
 /**
  * This autonomous (along with the chooser code above) shows how to select
@@ -54,26 +61,9 @@ void Robot::RobotPeriodic() {}
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
-void Robot::AutonomousInit() {
-  m_autoSelected = m_chooser.GetSelected();
-  // m_autoSelected = SmartDashboard::GetString("Auto Selector",
-  //     kAutoNameDefault);
-  std::cout << "Auto selected: " << m_autoSelected << std::endl;
+void Robot::AutonomousInit() {}
 
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
-  } else {
-    // Default Auto goes here
-  }
-}
-
-void Robot::AutonomousPeriodic() {
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
-  } else {
-    // Default Auto goes here
-  }
-}
+void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {}
 

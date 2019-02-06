@@ -9,6 +9,7 @@
 
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
+#include "subsystems/Arm.h"
 
 #include <string>
 #include <memory>
@@ -20,6 +21,7 @@
 #include "commands/FollowPath.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
+#include "commands/ManualArm.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -30,10 +32,7 @@ class Robot : public frc::TimedRobot {
   void TeleopInit() override;
   void TeleopPeriodic() override;
   void TestPeriodic() override;
-
-  frc::SendableChooser<std::string> m_chooser;
-  const std::string kAutoNameDefault = "Default";
-  const std::string kAutoNameCustom = "My Auto";
+  
   std::string m_autoSelected;
 
   static std::unique_ptr< DriveTrain > m_driveTrain;
@@ -43,4 +42,8 @@ class Robot : public frc::TimedRobot {
 	static std::unique_ptr< ApproachCargo > m_approachCargo;
 	static std::unique_ptr< SpeedTest > m_speedTest;
 	static std::unique_ptr< FollowPath > m_followPath;
+
+  static std::unique_ptr< Arm > m_arm;
+
+  static std::unique_ptr< ManualArm > m_manualArm;
 };

@@ -72,6 +72,10 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		setRightSidePhase(false);
 	}
 
+	for (auto& motor : m_lMotors) {
+		motor->SetInverted(true);
+	}
+
 	/*
 	for (int i = 0; i < 3; ++i) {
 		m_lMotors[i].SetInverted(true);
@@ -174,13 +178,15 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) 
 	//calibratePhase(leftSpeed, rightSpeed);
 
 	const double MAX_SPEED = 50.0;
+	
+	const double MAX_PERCENT = 0.5;
 
 	if (percentOutput) {
 		for (auto& motor : m_lMotors) {
-			motor->Set(ControlMode::PercentOutput, leftSpeed);
+			motor->Set(ControlMode::PercentOutput, leftSpeed * MAX_PERCENT);
 		}
 		for (auto& motor : m_rMotors) {
-			motor->Set(ControlMode::PercentOutput, rightSpeed);
+			motor->Set(ControlMode::PercentOutput, rightSpeed * MAX_PERCENT);
 		}
 	}
 	else {
