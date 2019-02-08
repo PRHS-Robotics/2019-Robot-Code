@@ -5,6 +5,7 @@
 #include "frc/commands/Command.h"
 
 class ManualArm : public frc::Command {
+public:
     ManualArm(Input *input);
 
     void Execute() override;

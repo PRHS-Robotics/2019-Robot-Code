@@ -2,7 +2,7 @@
 #include "Robot.h"
 
 const int   LEVEL_COUNT = 8;
-const double BASE_SENSOR_VALUES[LEVEL_COUNT] =  { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+const double BASE_SENSOR_VALUES[LEVEL_COUNT] =  { 2.9211, 3.26782, 3.372802, 3.6211225, 3.732909, 3.85864, 4.22363, 4.409129 };
 const double DIFFERENCE = 0.0;
 
 Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor) :
@@ -17,6 +17,11 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor) :
 {
     m_baseSensor.SetAverageBits(8);
     m_wristSensor.SetAverageBits(8);
+
+    m_basePID.SetOutputRange(-0.01, 0.01);
+
+    m_basePID.Enable();
+    m_wristPID.Enable();
 
     update();
 }

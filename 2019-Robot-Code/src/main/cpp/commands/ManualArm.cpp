@@ -27,6 +27,7 @@ void ManualArm::Execute() {
     else {
         debounce = false;
     }
+    Robot::m_arm->update();
 }
 
 bool ManualArm::IsFinished() {

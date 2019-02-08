@@ -2,6 +2,7 @@
 #include <frc/AnalogInput.h>
 #include <frc/PWMVictorSPX.h>
 #include <frc/commands/Subsystem.h>
+#include <ctre/phoenix.h>
 #include <frc/PIDController.h>
 
 // makes the arm do the arm things
@@ -26,10 +27,10 @@ private:
     // end ATOUGENERATED CODE, SOURCE=ROBOTBUILDER ID=DECLARATION
     // hope this is what you needed
     frc::AnalogInput   m_baseSensor;
-    frc::PWMVictorSPX  m_baseMotor;
+    WPI_VictorSPX m_baseMotor;
     frc::PIDController m_basePID;
 
     frc::AnalogInput   m_wristSensor;
-    frc::PWMVictorSPX  m_wristMotor;
+    WPI_VictorSPX m_wristMotor;
     frc::PIDController m_wristPID;
 };

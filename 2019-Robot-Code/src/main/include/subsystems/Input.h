@@ -25,8 +25,8 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
 		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
 		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
-		{ "ARM_UP", { "Arm Up", 4 } },
-		{ "ARM_DOWN", { "Arm Down", 6} }
+		{ "ARM_UP", { "Arm Up", 6 } },
+		{ "ARM_DOWN", { "Arm Down", 4 } }
 };
 
 constexpr const std::size_t MAX_BUTTONS = 11;
