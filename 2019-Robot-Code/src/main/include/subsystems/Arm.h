@@ -2,7 +2,7 @@
 #include <frc/AnalogInput.h>
 #include <frc/PWMVictorSPX.h>
 #include <frc/commands/Subsystem.h>
-#include <ctre/phoenix.h>
+#include <ctre/Phoenix.h>
 #include <frc/PIDController.h>
 
 // makes the arm do the arm things
@@ -31,6 +31,6 @@ private:
     frc::PIDController m_basePID;
 
     frc::AnalogInput   m_wristSensor;
-    WPI_VictorSPX m_wristMotor;
-    frc::PIDController m_wristPID;
+    //WPI_VictorSPX m_wristMotor;
+    //frc::PIDController m_wristPID;
 };

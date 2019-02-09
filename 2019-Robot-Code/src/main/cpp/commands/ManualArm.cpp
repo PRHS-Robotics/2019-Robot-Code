@@ -11,14 +11,14 @@ ManualArm::ManualArm(Input *input) :
 
 void ManualArm::Execute() {
     if (buttonValue(m_input->getInput(), "ARM_UP")) {
-        if (debounce) {
+        if (!debounce) {
             int currentLevel = Robot::m_arm->getLevel();
             Robot::m_arm->setLevel(currentLevel + 1);
         }
         debounce = true;
     }
     else if (buttonValue(m_input->getInput(), "ARM_DOWN")) {
-        if (debounce) {
+        if (!debounce) {
             int currentLevel = Robot::m_arm->getLevel();
             Robot::m_arm->setLevel(currentLevel - 1);
         }

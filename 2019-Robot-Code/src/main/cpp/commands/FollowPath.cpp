@@ -57,3 +57,7 @@ void FollowPath::End() {
 void FollowPath::Interrupted() {
     End();
 }
+
+double pathfinder_follow_encoder(EncoderConfig c, EncoderFollower *follower, Segment *trajectory, int trajectory_length, int encoder_tick) {
+    return 0.0;
+}
