@@ -19,10 +19,13 @@ std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
-
+std::unique_ptr< Elevator > Robot::m_elevator{};
+std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatordrivetrain{};
+std::unique_ptr< Manipulator > Robot::m_manipulator{};
 std::unique_ptr< Arm > Robot::m_arm{};
 
 std::unique_ptr< ManualArm > Robot::m_manualArm{};
+
 
 void Robot::RobotInit() {
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);

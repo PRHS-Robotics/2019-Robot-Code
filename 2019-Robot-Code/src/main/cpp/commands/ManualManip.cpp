@@ -3,14 +3,14 @@
 
 ManualManip::ManualManip(Input *input) :
     m_input(input),
-    Command("ManualManip", Robot::m_manipulator)
+    Command("ManualManip", *Robot::m_manipulator)
 {
     
 }
 
 void ManualManip::Execute() {
-    bool intakeCargo = buttonValue(input->getInput(), "INTAKE_CARGO");
-    bool outtakeCargo = buttonValue(input->getInput(), "OUTTAKE_CARGO");
+    bool intakeCargo = buttonValue(m_input->getInput(), "INTAKE_CARGO");
+    bool outtakeCargo = buttonValue(m_input->getInput(), "OUTTAKE_CARGO");
 
     if (intakeCargo) {
         Robot::m_manipulator->setCargoDir(-1.0);
@@ -19,7 +19,21 @@ void ManualManip::Execute() {
         Robot::m_manipulator->setCargoDir(1.0);
     }
 
-    Robot::m_manipulator->setExtended(buttonValue(input->getInput(), "OUTTAKE_PANEL"));
+    Robot::m_manipulator->setExtended(buttonValue(m_input->getInput(), "OUTTAKE_PANEL"));
 
     Robot::m_manipulator->update();
+}
+
+bool ManualManip::IsFinished() {
+    return false;
+}
+
+void ManualManip::End() {
+    Robot::m_manipulator->setCargoDir(0.0);
+    Robot::m_manipulator->setExtended(false);
+    Robot::m_manipulator->update();
+}
+
+void ManualManip::Interrupted() {
+    End();
 }

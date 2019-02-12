@@ -4,7 +4,7 @@
 
 ManualControl::ManualControl(Input *input) :
     m_input(input),
-    Command("ManualControl", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
+    Command("ManualControl", *Robot::m_driveTrain.get())
 {
 
 }

@@ -5,7 +5,7 @@
 #include <frc/DigitalInput.h>
 #include "rev/SparkMax.h"
 
-class Manipulator : frc::Subsystem {
+class Manipulator : public frc::Subsystem {
 public:
     Manipulator(int motorPort, int extendSolenoidPort, int retractSolenoidPort, int switchPort);
 
