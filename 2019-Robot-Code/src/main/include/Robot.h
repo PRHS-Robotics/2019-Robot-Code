@@ -22,6 +22,7 @@
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
+#include "commands/ManualManip.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -44,6 +45,8 @@ class Robot : public frc::TimedRobot {
 	static std::unique_ptr< FollowPath > m_followPath;
 
   static std::unique_ptr< Arm > m_arm;
+  static std::unique_ptr< Manipulator > m_manipulator;
 
   static std::unique_ptr< ManualArm > m_manualArm;
+  static std::unique_ptr< ManualManip > m_manualManip;
 };
