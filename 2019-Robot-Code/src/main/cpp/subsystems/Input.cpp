@@ -6,7 +6,7 @@
  */
 
 #include "subsystems/Input.h"
-#include <SmartDashboard/SmartDashboard.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 #include <cmath>
 #include <frc/buttons/JoystickButton.h>
 

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "subsystems/DriveTrain.h"
+#include "subsystems/ElevatorDriveTrain.h"
 #include "subsystems/Input.h"
 #include "subsystems/Arm.h"
 
@@ -22,6 +23,7 @@
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
+#include "commands/Elevator.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -36,6 +38,7 @@ class Robot : public frc::TimedRobot {
   std::string m_autoSelected;
 
   static std::unique_ptr< DriveTrain > m_driveTrain;
+  static std::unique_ptr< ElevatorDriveTrain > m_elevatordrivetrain;
   static std::unique_ptr< Input > m_input;
 
 	static std::unique_ptr< ManualControl > m_manualControl;
@@ -44,6 +47,7 @@ class Robot : public frc::TimedRobot {
 	static std::unique_ptr< FollowPath > m_followPath;
 
   static std::unique_ptr< Arm > m_arm;
+  static std::unique_ptr< Elevator > m_elevator;
 
   static std::unique_ptr< ManualArm > m_manualArm;
 };
