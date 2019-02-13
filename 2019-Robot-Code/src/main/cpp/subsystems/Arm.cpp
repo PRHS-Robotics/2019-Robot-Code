@@ -54,8 +54,8 @@ std::pair< double, double > Arm::getSensorValues() {
 }
 
 void Arm::update() {
-    static double current = BASE_SENSOR_VALUES[m_level] - 0.6921;
-    double target = BASE_SENSOR_VALUES[m_level] - 0.6921;
+    static double current = BASE_SENSOR_VALUES[m_level] /*- 0.6921*/ + 0.3;
+    double target = BASE_SENSOR_VALUES[m_level] /*- 0.6921*/ + 0.3;
     current += 0.05 * (target - current);
     m_basePID.SetSetpoint(current);
     //m_wristPID.SetSetpoint(DIFFERENCE - BASE_SENSOR_VALUES[m_level]);
