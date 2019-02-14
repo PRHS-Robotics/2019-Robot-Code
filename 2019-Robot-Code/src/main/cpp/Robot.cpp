@@ -11,6 +11,7 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/commands/Scheduler.h>
+#include <cameraserver/CameraServer.h>
 
 std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
 std::unique_ptr< Input > Robot::m_input{};
@@ -38,6 +39,8 @@ void Robot::RobotInit() {
   m_arm = std::make_unique< Arm >(1, 0, 2, 1);
 
   m_manualArm = std::make_unique< ManualArm >(Robot::m_input.get());
+
+  frc::CameraServer::GetInstance()->StartAutomaticCapture(0);
 }
 
 /**
@@ -71,6 +74,7 @@ void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
+  m_arm->setLevel(0);
   m_manualArm->Start();
 }
 
