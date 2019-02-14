@@ -31,6 +31,6 @@ private:
     frc::PIDController m_basePID;
 
     frc::AnalogInput   m_wristSensor;
-    //WPI_VictorSPX m_wristMotor;
-    //frc::PIDController m_wristPID;
+    WPI_VictorSPX m_wristMotor;
+    frc::PIDController m_wristPID;
 };
