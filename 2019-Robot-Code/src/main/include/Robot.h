@@ -18,6 +18,7 @@
 
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
+#include <frc/Compressor.h>
 
 #include "commands/ApproachCargo.h"
 #include "commands/FollowPath.h"
@@ -42,6 +43,9 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser< int > m_armChooser;
   frc::SendableChooser< int > m_manipulatorChooser;
   frc::SendableChooser< int > m_driveTrainChooser;
+  frc::SendableChooser< int > m_pneumaticChooser;
+
+  static std::unique_ptr< frc::Compressor > m_compressor;
 
   static std::unique_ptr< DriveTrain > m_driveTrain;
   static std::unique_ptr< ElevatorDriveTrain > m_elevatordrivetrain;

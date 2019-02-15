@@ -15,6 +15,7 @@
 
 std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
 std::unique_ptr< Input > Robot::m_input{};
+std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
@@ -46,6 +47,8 @@ void Robot::RobotInit() {
 
   m_manualManip = std::make_unique< ManualManip >(Robot::m_input.get());
 
+  m_compressor = std::make_unique< frc::Compressor >(0);
+
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
 
@@ -57,6 +60,9 @@ void Robot::RobotInit() {
 
   m_driveTrainChooser.SetDefaultOption("Disabled", 0);
   m_driveTrainChooser.AddOption("Enabled", 1);
+
+  m_pneumaticChooser.SetDefaultOption("Disabled", 0);
+  m_pneumaticChooser.AddOption("Enabled", 1);
 
   frc::CameraServer::GetInstance()->StartAutomaticCapture(0);
 }
@@ -109,6 +115,13 @@ void Robot::TeleopInit() {
       std::cout << "Starting drive train control system\n";
       m_manualControl->Start();
     }
+    if (m_pneumaticChooser.GetSelected()) {
+      std::cout << "Starting pneumatic system\n";
+      m_compressor->Start();
+    }
+    else {
+      m_compressor->Stop();
+    }
     std::cout << "Finished starting commands\n";
   }
   else {
@@ -116,6 +129,7 @@ void Robot::TeleopInit() {
     m_manualControl->Start();
     m_manualArm->Start();
     m_manualManip->Start();
+    m_compressor->Start();
   }
 }
 
