@@ -1,4 +1,5 @@
 #include "subsystems/Manipulator.h"
+#include <frc/commands/Scheduler.h>
 
 Manipulator::Manipulator(int motorPort, int extendSolenoidPort, int retractSolenoidPort, int switchPort) :
     m_cargoMotor(motorPort),
@@ -7,10 +8,10 @@ Manipulator::Manipulator(int motorPort, int extendSolenoidPort, int retractSolen
     m_stopSwitch(switchPort),
     Subsystem("Manipulator")
 {
-    
+    frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
 
-void Manipulator::setCargoDir(int dir) {
+void Manipulator::setCargoDir(double dir) {
     m_cargoDir = dir;
 }
 
@@ -19,6 +20,6 @@ void Manipulator::setExtended(bool extended) {
     m_retractSolenoid.Set(!extended);
 }
 
-void Manipulator::update() {
-    m_cargoMotor.Set(m_cargoDir * 0.2);
+void Manipulator::Periodic() {
+    m_cargoMotor.Set(m_cargoDir);
 }

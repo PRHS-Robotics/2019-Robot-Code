@@ -10,6 +10,36 @@
 #include <cmath>
 #include <frc/buttons/JoystickButton.h>
 
+enum ButtonId {
+	XBOX_A = 1 + MAX_PRIMARY_BUTTONS,
+	XBOX_B,
+	XBOX_X,
+	XBOX_Y,
+	XBOX_LB,
+	XBOX_RB,
+	XBOX_BACK,
+	XBOX_START,
+	XBOX_L,
+	XBOX_R
+};
+
+static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
+		{ "SHIFT_FAST", { "High Speed", 3 }, },
+		{ "SHIFT_SLOW", { "Low Speed", 5 }, },
+		{ "TRIGGER", 	{ "Trigger", 1 } },
+		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
+		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
+		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
+		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
+		{ "ARM_UP", { "Arm Up", 6 } },
+		{ "ARM_DOWN", { "Arm Down", 4 } },
+		{ "ARM_LEVEL_1", { "Arm Level 1", XBOX_A } },
+		{ "ARM_LEVEL_2", { "Arm Level 2", XBOX_B } },
+		{ "ARM_LEVEL_3", { "Arm Level 3", XBOX_Y } },
+		{ "ARM_RETRACT", { "Arm Retract", XBOX_BACK } }
+};
+
+
 // Checks SmartDashboard entry, returns true if button map is valid and usable
 static bool isValidMap(std::string buttonId) {
 	// SmartDashboard does not support integral-only values
@@ -39,7 +69,7 @@ bool buttonValue(InputState input, const std::string& buttonId) {
 		return false;
 	}
 	else {
-		return input.buttons[index];
+		return input.buttons[index - 1];
 	}
 }
 
@@ -66,9 +96,12 @@ Input::Input(int primaryPort, int secondaryPort) :
 		}
 	}
 
-	for (int i = 0; i < MAX_BUTTONS; ++i) {
+	for (int i = 0; i < MAX_PRIMARY_BUTTONS; ++i) {
 		// Arrays start at 0, button numbering starts at 1
-		buttons.push_back(std::make_unique< frc::JoystickButton >(&primary, i + 1));
+		buttons[i] = std::make_unique< frc::JoystickButton >(&primary, i + 1);
+	}
+	for (int i = 0; i < MAX_SECONDARY_BUTTONS; ++i) {
+		buttons[i + MAX_PRIMARY_BUTTONS] = std::make_unique< frc::JoystickButton >(&secondary, i + 1);
 	}
 }
 
@@ -78,10 +111,20 @@ InputState Input::getRawInput() {
 		primary.GetY(),
 		primary.GetZ(),
 		primary.GetThrottle(),
+		secondary.GetRawAxis(0),
+		secondary.GetRawAxis(1),
+		secondary.GetRawAxis(2),
+		secondary.GetRawAxis(3),
+		secondary.GetRawAxis(4),
+		secondary.GetRawAxis(5),
+		secondary.GetPOV(),
 		0
 	};
-	for (std::size_t i = 0; i < MAX_BUTTONS; ++i) {
-		temp.buttons[i + 1] = primary.GetRawButton(i + 1);
+	for (std::size_t i = 0; i < MAX_PRIMARY_BUTTONS; ++i) {
+		temp.buttons[i] = primary.GetRawButton(i + 1);
+	}
+	for (std::size_t i = 0; i < MAX_SECONDARY_BUTTONS; ++i) {
+		temp.buttons[i + MAX_PRIMARY_BUTTONS] = secondary.GetRawButton(i + 1);
 	}
 	return temp;
 }
@@ -96,6 +139,15 @@ InputState Input::getInput() {
 	rawState.y = applyDeadzone(rawState.y, deadzone);
 
 	rawState.t = applyDeadzone(rawState.t, deadzone);
+
+	rawState.lx = applyDeadzone(rawState.lx, deadzone);
+	rawState.ly = applyDeadzone(rawState.ly, deadzone);
+
+	rawState.ltrig = applyDeadzone(rawState.ltrig, deadzone);
+	rawState.rtrig = applyDeadzone(rawState.rtrig, deadzone);
+
+	rawState.rx = applyDeadzone(rawState.rx, deadzone);
+	rawState.ry = applyDeadzone(rawState.ry, deadzone);
 
 	return rawState;
 }

@@ -3,7 +3,7 @@
 #include "subsystems/Input.h"
 #include "frc/commands/Command.h"
 
-class ManualManip : frc::Command {
+class ManualManip : public frc::Command {
 public:
     ManualManip(Input *input);
 

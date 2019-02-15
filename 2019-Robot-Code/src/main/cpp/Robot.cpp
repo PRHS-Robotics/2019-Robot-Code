@@ -25,12 +25,14 @@ std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatordrivetrain{};
 std::unique_ptr< Manipulator > Robot::m_manipulator{};
 std::unique_ptr< Arm > Robot::m_arm{};
 
+std::unique_ptr< ManualManip > Robot::m_manualManip{};
+
 std::unique_ptr< ManualArm > Robot::m_manualArm{};
 
 
 void Robot::RobotInit() {
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
-  m_input = std::make_unique< Input >(1, 2);
+  m_input = std::make_unique< Input >(0, 1);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
@@ -39,6 +41,22 @@ void Robot::RobotInit() {
   m_arm = std::make_unique< Arm >(1, 0, 2, 1);
 
   m_manualArm = std::make_unique< ManualArm >(Robot::m_input.get());
+
+  m_manipulator = std::make_unique< Manipulator >(3, 0, 1, 0);
+
+  m_manualManip = std::make_unique< ManualManip >(Robot::m_input.get());
+
+  m_testModeChooser.SetDefaultOption("Competition Mode", 0);
+  m_testModeChooser.AddOption("Test Mode", 1);
+
+  m_armChooser.SetDefaultOption("Disabled", 0);
+  m_armChooser.AddOption("Enabled", 1);
+
+  m_manipulatorChooser.SetDefaultOption("Disabled", 0);
+  m_manipulatorChooser.AddOption("Enabled", 1);
+
+  m_driveTrainChooser.SetDefaultOption("Disabled", 0);
+  m_driveTrainChooser.AddOption("Enabled", 1);
 
   frc::CameraServer::GetInstance()->StartAutomaticCapture(0);
 }
@@ -74,12 +92,34 @@ void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
-  m_arm->setLevel(0);
-  m_manualArm->Start();
+  frc::Scheduler::GetInstance()->RemoveAll();
+
+  std::cout << "Starting teleop\n";
+  if (m_testModeChooser.GetSelected()) {
+    std::cout << "Running in test mode\n";
+    if (m_armChooser.GetSelected()) {
+      std::cout << "Starting arm control system\n";
+      m_manualArm->Start();
+    }
+    if (m_manipulatorChooser.GetSelected()) {
+      std::cout << "Starting manipulator control system\n";
+      m_manualManip->Start();
+    }
+    if (m_driveTrainChooser.GetSelected()) {
+      std::cout << "Starting drive train control system\n";
+      m_manualControl->Start();
+    }
+    std::cout << "Finished starting commands\n";
+  }
+  else {
+    std::cout << "Running in competition mode\n";
+    m_manualControl->Start();
+    m_manualArm->Start();
+    m_manualManip->Start();
+  }
 }
 
 void Robot::TeleopPeriodic() {
-  std::cout << m_arm->getLevel() << "\n";
   frc::Scheduler::GetInstance()->Run();
 }
 

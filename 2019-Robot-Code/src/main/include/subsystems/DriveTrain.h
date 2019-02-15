@@ -30,7 +30,7 @@ public:
 
 	void resetSensors();
 
-	void InitDefaultCommand() override;
+	//void InitDefaultCommand() override;
 
 private:
 

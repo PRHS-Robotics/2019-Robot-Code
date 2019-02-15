@@ -17,23 +17,15 @@
 #include <tuple>
 #include <vector>
 
-static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
-		{ "SHIFT_FAST", { "High Speed", 3 }, },
-		{ "SHIFT_SLOW", { "Low Speed", 5 }, },
-		{ "TRIGGER", 	{ "Trigger", 1 } },
-		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
-		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
-		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
-		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
-		{ "ARM_UP", { "Arm Up", 6 } },
-		{ "ARM_DOWN", { "Arm Down", 4 } }
-};
+constexpr const std::size_t MAX_PRIMARY_BUTTONS = 11;
+constexpr const std::size_t MAX_SECONDARY_BUTTONS = 10;
+constexpr const std::size_t MAX_BUTTONS = MAX_PRIMARY_BUTTONS + MAX_SECONDARY_BUTTONS;
 
-constexpr const std::size_t MAX_BUTTONS = 11;
-
+// Stores the current state of the joystick & xbox controller axes, buttons, etc.
 struct InputState {
-	double x, y, r, t;
-	std::bitset< MAX_BUTTONS + 1 > buttons; // FRC button numbering starts at 1
+	double x, y, r, t, lx, ly, ltrig, rtrig, rx, ry;
+	int pov2;
+	std::bitset< MAX_BUTTONS > buttons;
 };
 
 std::size_t buttonIndex(const std::string& buttonId);
@@ -57,7 +49,7 @@ public:
 
 private:
 
-	std::vector< std::unique_ptr< frc::Button > > buttons;
+	std::array< std::unique_ptr< frc::Button >, MAX_BUTTONS > buttons;
 
 	frc::Joystick primary;
 	frc::XboxController secondary;

@@ -16,9 +16,11 @@ public:
 
     std::pair< double, double > getSensorValues();
 
-    void update();
+    void Periodic() override;
 
     void InitDefaultCommand() override;
+
+    void setEnabled(bool enabled);
 
 private:
     int m_level;

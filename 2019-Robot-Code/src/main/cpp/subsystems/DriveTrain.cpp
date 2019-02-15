@@ -121,9 +121,9 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
 
-void DriveTrain::InitDefaultCommand() {
+/*void DriveTrain::InitDefaultCommand() {
 	SetDefaultCommand(Robot::m_manualControl.get());
-}
+}*/
 
 void DriveTrain::resetSensors() {
 	for (auto& talon : m_lMotors) {

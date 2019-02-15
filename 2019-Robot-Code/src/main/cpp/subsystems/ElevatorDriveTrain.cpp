@@ -2,8 +2,7 @@
 #include "subsystems/ElevatorDriveTrain.h"
 //#include <ctre/Phoenix.h>
 #include "subsystems/DriveTrain.h"
-#include <frc/Talon.h>
-#include <frc/PWMSpeedController.h>
+#include <frc/commands/Scheduler.h>
 //#include <SmartDashboard/SmartDashboard.h>
 #include <iostream>
 
@@ -13,7 +12,7 @@ ElevatorDriveTrain::ElevatorDriveTrain(int extender, int driveMotor) :
   Subsystem("ElevatorDriveTrain")
 {
   
-  //frc::Scheduler::GetInstance()->RegisterSubsystem(this);
+  frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
 
 

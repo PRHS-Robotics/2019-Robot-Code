@@ -9,14 +9,14 @@ class Manipulator : public frc::Subsystem {
 public:
     Manipulator(int motorPort, int extendSolenoidPort, int retractSolenoidPort, int switchPort);
 
-    void setCargoDir(int dir);
+    void setCargoDir(double dir);
 
     void setExtended(bool extended);
 
-    void update();
+    void Periodic() override;
 
 private:
-    int m_cargoDir; 
+    double m_cargoDir; 
 
     rev::SparkMax m_cargoMotor;
     frc::Solenoid m_extendSolenoid;

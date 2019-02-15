@@ -36,8 +36,12 @@ class Robot : public frc::TimedRobot {
   void TeleopInit() override;
   void TeleopPeriodic() override;
   void TestPeriodic() override;
-  
-  std::string m_autoSelected;
+
+  frc::SendableChooser< int > m_testModeChooser;
+
+  frc::SendableChooser< int > m_armChooser;
+  frc::SendableChooser< int > m_manipulatorChooser;
+  frc::SendableChooser< int > m_driveTrainChooser;
 
   static std::unique_ptr< DriveTrain > m_driveTrain;
   static std::unique_ptr< ElevatorDriveTrain > m_elevatordrivetrain;
