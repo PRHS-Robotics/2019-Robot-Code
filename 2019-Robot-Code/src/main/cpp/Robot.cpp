@@ -39,7 +39,7 @@ void Robot::RobotInit() {
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
-  m_arm = std::make_unique< Arm >(1, 0, 2, 1);
+  m_arm = std::make_unique< Arm >(1, 0, 2, 1, 1);
 
   m_manualArm = std::make_unique< ManualArm >(Robot::m_input.get());
 

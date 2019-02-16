@@ -8,7 +8,7 @@
 // makes the arm do the arm things
 class Arm : public frc::Subsystem {
 public:
-    Arm(int baseMotor, int baseSensorPort, int wristMotor, int wristSensor);
+    Arm(int baseMotor, int baseSensorPort, int wristMotor, int wristSensor, int stopSwitchPort);
 
     void setLevel(int level);
 
@@ -35,4 +35,6 @@ private:
     frc::AnalogInput   m_wristSensor;
     WPI_VictorSPX m_wristMotor;
     frc::PIDController m_wristPID;
+
+    frc::DigitalInput m_stopSwitch;
 };

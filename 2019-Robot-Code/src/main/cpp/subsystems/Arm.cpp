@@ -11,7 +11,10 @@ const double BASE_SENSOR_VALUES[LEVEL_COUNT] = { 2.8, 2.933, 3.375, 3.817, 4.310
 const double WRIST_SENSOR_VALUES[LEVEL_COUNT] = { 3.93, 3.508, 3.443, 3.473, 3.309, 3.872, 3.4787, 3.680 };
 const double DIFFERENCE = 0.0;
 
-Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor) :
+const double lower_output_limit = -0.2;
+const double upper_output_limit =  0.2;
+
+Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int stopSwitchPort) :
     m_baseSensor(baseSensor),
     m_wristSensor(wristSensor),
     m_baseMotor(baseMotor),
@@ -19,13 +22,14 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor) :
     m_basePID(2, 0.01, 0.0, m_baseSensor, m_baseMotor),
     m_wristPID(4, 0.0, 0.0, m_wristSensor, m_wristMotor),
     m_level(0),
+    m_stopSwitch(stopSwitchPort),
     Subsystem("ARM")
 {
     m_baseSensor.SetAverageBits(8);
     m_wristSensor.SetAverageBits(8);
 
     m_basePID.SetOutputRange(-0.1, 0.4);
-    m_wristPID.SetOutputRange(/*-0.3, 0.7*/-0.2,0.2);
+    m_wristPID.SetOutputRange(/*-0.3, 0.7*/lower_output_limit,upper_output_limit);
 
     m_basePID.SetContinuous(false);
     m_wristPID.SetContinuous(false);
@@ -64,6 +68,11 @@ std::pair< double, double > Arm::getSensorValues() {
 }
 
 void Arm::Periodic() {
+    if (!m_stopSwitch.Get()) {
+        m_wristPID.SetOutputRange(lower_output_limit, 0.0);
+    }
+
+
     // Allows for gradual change of arm and wrist target position
     double currentArm = m_basePID.GetSetpoint();
     double targetArm = BASE_SENSOR_VALUES[m_level];
