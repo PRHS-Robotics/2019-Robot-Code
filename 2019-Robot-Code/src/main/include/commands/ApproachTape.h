@@ -4,9 +4,9 @@
 #include <ctre/Phoenix.h>
 #include <tuple>
 
-class ApproachCargo : public frc::Command {
+class ApproachTape : public frc::Command {
 public:
-    ApproachCargo();
+    ApproachTape();
 
     void Initialize() override;
 
