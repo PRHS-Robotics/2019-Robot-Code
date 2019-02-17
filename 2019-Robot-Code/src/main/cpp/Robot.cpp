@@ -52,17 +52,23 @@ void Robot::RobotInit() {
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
 
-  m_armChooser.SetDefaultOption("Disabled", 0);
-  m_armChooser.AddOption("Enabled", 1);
+  m_armChooser.SetDefaultOption("DisabledArm", 0);
+  m_armChooser.AddOption("EnabledArm", 1);
 
-  m_manipulatorChooser.SetDefaultOption("Disabled", 0);
-  m_manipulatorChooser.AddOption("Enabled", 1);
+  m_manipulatorChooser.SetDefaultOption("DisabledManip", 0);
+  m_manipulatorChooser.AddOption("EnabledManip", 1);
 
-  m_driveTrainChooser.SetDefaultOption("Disabled", 0);
-  m_driveTrainChooser.AddOption("Enabled", 1);
+  m_driveTrainChooser.SetDefaultOption("DisabledDrive", 0);
+  m_driveTrainChooser.AddOption("EnabledDrive", 1);
 
-  m_pneumaticChooser.SetDefaultOption("Disabled", 0);
-  m_pneumaticChooser.AddOption("Enabled", 1);
+  m_pneumaticChooser.SetDefaultOption("DisabledCompressor", 0);
+  m_pneumaticChooser.AddOption("EnabledCompressor", 1);
+
+  frc::SmartDashboard::PutData("Mode Chooser", &m_testModeChooser);
+  frc::SmartDashboard::PutData("Arm Chooser", &m_armChooser);
+  frc::SmartDashboard::PutData("Manip Chooser", &m_manipulatorChooser);
+  frc::SmartDashboard::PutData("Drive Chooser", &m_driveTrainChooser);
+  frc::SmartDashboard::PutData("Pneumatic Chooser", &m_pneumaticChooser);
 
   frc::CameraServer::GetInstance()->StartAutomaticCapture(0);
 }
@@ -93,11 +99,8 @@ void Robot::RobotPeriodic() {
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
-void Robot::AutonomousInit() {}
 
-void Robot::AutonomousPeriodic() {}
-
-void Robot::TeleopInit() {
+void Robot::matchInit() {
   frc::Scheduler::GetInstance()->RemoveAll();
 
   std::cout << "Starting teleop\n";
@@ -133,8 +136,24 @@ void Robot::TeleopInit() {
   }
 }
 
-void Robot::TeleopPeriodic() {
+void Robot::matchPeriodic() {
   frc::Scheduler::GetInstance()->Run();
+}
+
+void Robot::AutonomousInit() {
+  matchInit();
+}
+
+void Robot::AutonomousPeriodic() {
+  matchPeriodic();
+}
+
+void Robot::TeleopInit() {
+  matchInit();
+}
+
+void Robot::TeleopPeriodic() {
+  matchPeriodic();
 }
 
 void Robot::TestPeriodic() {}

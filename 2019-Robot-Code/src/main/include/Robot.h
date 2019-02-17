@@ -38,6 +38,9 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
+  void matchInit();
+  void matchPeriodic();
+
   frc::SendableChooser< int > m_testModeChooser;
 
   frc::SendableChooser< int > m_armChooser;

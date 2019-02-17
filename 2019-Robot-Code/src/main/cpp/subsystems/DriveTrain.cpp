@@ -179,7 +179,7 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) 
 
 	const double MAX_SPEED = 50.0;
 	
-	const double MAX_PERCENT = 0.5;
+	const double MAX_PERCENT = 1.0;
 
 	if (percentOutput) {
 		for (auto& motor : m_lMotors) {

@@ -42,18 +42,24 @@ void ManualArm::Execute() {
         m_hatchMode = true;
     }
 
-    if (buttonValue(m_input->getInput(), "ARM_LEVEL_1")) {
-        Robot::m_arm->setLevel(2 + 3 * m_hatchMode);
-    }
-    if (buttonValue(m_input->getInput(), "ARM_LEVEL_2")) {
-        Robot::m_arm->setLevel(3 + 3 * m_hatchMode);
-    }
-    if (buttonValue(m_input->getInput(), "ARM_LEVEL_3")) {
-        Robot::m_arm->setLevel(4 + 3 * m_hatchMode);
+    if (m_input->getInput().ltrig > 0.9 || m_input->getInput().rtrig > 0.9) {
+        if (buttonValue(m_input->getInput(), "ARM_LEVEL_1")) {
+            Robot::m_arm->setLevel(2 + !m_hatchMode);
+        }
+        if (buttonValue(m_input->getInput(), "ARM_LEVEL_2")) {
+            Robot::m_arm->setLevel(4 + !m_hatchMode);
+        }
+        if (buttonValue(m_input->getInput(), "ARM_LEVEL_3")) {
+            Robot::m_arm->setLevel(6 + !m_hatchMode);
+        }
     }
 
     if (buttonValue(m_input->getInput(), "ARM_RETRACT")) {
         Robot::m_arm->setLevel(0);
+    }
+
+    if (buttonValue(m_input->getInput(), "ARM_CARGO_INTAKE")) {
+        Robot::m_arm->setLevel(1);
     }
 }
 

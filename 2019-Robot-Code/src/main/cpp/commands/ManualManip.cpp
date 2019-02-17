@@ -19,7 +19,7 @@ void ManualManip::Execute() {
         Robot::m_manipulator->setCargoDir(1.0);
     }*/
 
-    Robot::m_manipulator->setCargoDir(m_input->getInput().ly * 0.5);
+    Robot::m_manipulator->setCargoDir(m_input->getInput().ly * 1.0);
 
     Robot::m_manipulator->setExtended(m_input->getInput().pov2 == 0);
 

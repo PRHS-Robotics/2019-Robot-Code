@@ -4,6 +4,7 @@
 #include <frc/commands/Subsystem.h>
 #include <ctre/Phoenix.h>
 #include <frc/PIDController.h>
+#include <frc/DigitalInput.h>
 
 // makes the arm do the arm things
 class Arm : public frc::Subsystem {

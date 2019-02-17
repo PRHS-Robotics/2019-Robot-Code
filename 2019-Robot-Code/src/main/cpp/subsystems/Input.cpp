@@ -36,7 +36,8 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "ARM_LEVEL_1", { "Arm Level 1", XBOX_A } },
 		{ "ARM_LEVEL_2", { "Arm Level 2", XBOX_B } },
 		{ "ARM_LEVEL_3", { "Arm Level 3", XBOX_Y } },
-		{ "ARM_RETRACT", { "Arm Retract", XBOX_BACK } }
+		{ "ARM_RETRACT", { "Arm Retract", XBOX_BACK } },
+		{ "ARM_CARGO_INTAKE", { "Arm Cargo Intake", XBOX_X } }
 };
 
 
