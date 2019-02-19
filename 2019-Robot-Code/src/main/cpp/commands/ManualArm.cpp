@@ -33,32 +33,37 @@ void ManualArm::Execute() {
     else {
         m_debounce = false;
     }*/
-    if (m_input->getInput().ltrig > 0.9) {
-        std::cout << "hatch mode false\n";
-        m_hatchMode = false;
-    }
-    if (m_input->getInput().rtrig > 0.9) {
-        std::cout << "hatch mode true\n";
-        m_hatchMode = true;
-    }
 
-    if (m_input->getInput().ltrig > 0.9 || m_input->getInput().rtrig > 0.9) {
+    bool cargoMode = buttonValue(m_input->getInput(), "ARM_CARGO_LEVELS");
+    bool hatchMode = buttonValue(m_input->getInput(), "ARM_HATCH_LEVELS");
+
+    if (cargoMode || hatchMode) {
         if (buttonValue(m_input->getInput(), "ARM_LEVEL_1")) {
-            Robot::m_arm->setLevel(2 + !m_hatchMode);
+            Robot::m_arm->setLevel(2 + cargoMode);
         }
         if (buttonValue(m_input->getInput(), "ARM_LEVEL_2")) {
-            Robot::m_arm->setLevel(4 + !m_hatchMode);
+            Robot::m_arm->setLevel(4 + cargoMode);
         }
         if (buttonValue(m_input->getInput(), "ARM_LEVEL_3")) {
-            Robot::m_arm->setLevel(6 + !m_hatchMode);
+            Robot::m_arm->setLevel(6 + cargoMode);
         }
+    }
+
+
+    if (m_input->getInput().pov2 == 90) {
+        Robot::m_arm->setLevel(8);
     }
 
     if (buttonValue(m_input->getInput(), "ARM_RETRACT")) {
-        Robot::m_arm->setLevel(0);
+        Robot::m_arm->setLevel(Robot::m_manipulator->hasCargo() ? 9 : 0);
     }
 
-    if (buttonValue(m_input->getInput(), "ARM_CARGO_INTAKE")) {
+    if (Robot::m_manipulator->hasCargo()) {
+        if (Robot::m_arm->getLevel() == 1) {
+            Robot::m_arm->setLevel(9);
+        }
+    }
+    else if (buttonValue(m_input->getInput(), "ARM_CARGO_INTAKE")) {
         Robot::m_arm->setLevel(1);
     }
 }

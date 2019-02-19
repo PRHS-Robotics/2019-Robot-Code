@@ -11,6 +11,10 @@ Manipulator::Manipulator(int motorPort, int extendSolenoidPort, int retractSolen
     frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
 
+bool Manipulator::hasCargo() const {
+    return !m_stopSwitch.Get();
+}
+
 void Manipulator::setCargoDir(double dir) {
     m_cargoDir = dir;
 }

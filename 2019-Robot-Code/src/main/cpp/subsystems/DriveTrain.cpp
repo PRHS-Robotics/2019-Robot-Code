@@ -144,7 +144,7 @@ void DriveTrain::drive(InputState state) {
 }
 
 template < typename T >
-int signum(const T& value) {
+static int signum(const T& value) {
 	return (value > 0) - (value < 0);
 }
 

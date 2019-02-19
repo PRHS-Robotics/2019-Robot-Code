@@ -22,6 +22,4 @@ private:
     Input *m_input = nullptr;
 
     bool m_debounce = false;
-
-    bool m_hatchMode = false;
 };

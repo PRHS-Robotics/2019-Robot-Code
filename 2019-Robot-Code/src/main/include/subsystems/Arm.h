@@ -25,10 +25,7 @@ public:
 
 private:
     int m_level;
-    // AnalogChannel * potentiometer;
-    // Victor* victor;
-    // end ATOUGENERATED CODE, SOURCE=ROBOTBUILDER ID=DECLARATION
-    // hope this is what you needed
+    
     frc::AnalogInput   m_baseSensor;
     WPI_VictorSPX m_baseMotor;
     frc::PIDController m_basePID;

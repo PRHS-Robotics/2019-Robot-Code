@@ -13,6 +13,8 @@ public:
 
     void setExtended(bool extended);
 
+    bool hasCargo() const;
+
     void Periodic() override;
 
 private:
