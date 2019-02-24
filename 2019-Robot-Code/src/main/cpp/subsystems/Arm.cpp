@@ -9,8 +9,8 @@
 const int LEVEL_COUNT = 10;
 /*const double BASE_SENSOR_VALUES[LEVEL_COUNT] = { 2.8, 2.933, 3.375, 3.817, 4.310, 2.974, 3.441, 3.947 };
 const double WRIST_SENSOR_VALUES[LEVEL_COUNT] = { 3.93, 3.508, 3.443, 3.473, 3.309, 3.872, 3.4787, 3.680 };*/
-const double BASE_SENSOR_VALUES[LEVEL_COUNT] =  { 2.461, 2.771, /*3.152*/2.713, 3.071, 3.187, 3.518, 3.667, 3.968, 3.327, 2.461 };
-const double WRIST_SENSOR_VALUES[LEVEL_COUNT] = { 2.563, 3.029, /*3.979*/2.665, 3.061, 2.765, 3.146, 2.859, 3.176, 3.156, 2.669 };
+const double BASE_SENSOR_VALUES[LEVEL_COUNT] =  { 2.461, 2.771, /*2.713*/2.733, 3.071, 3.217, 3.518, 3.697, 3.968, 3.327, 2.461 };
+const double WRIST_SENSOR_VALUES[LEVEL_COUNT] = { 2.563, 3.029, /*2.665*/2.665, 3.061, 2.765, 3.146, 2.859, 3.176, 3.156, 2.669 };
 const double DIFFERENCE = 0.0;
 
 const double arm_lower_output_limit = -0.05;
