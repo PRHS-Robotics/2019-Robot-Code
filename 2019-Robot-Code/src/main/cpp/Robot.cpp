@@ -30,6 +30,42 @@ std::unique_ptr< ManualManip > Robot::m_manualManip{};
 
 std::unique_ptr< ManualArm > Robot::m_manualArm{};
 
+std::unique_ptr< PigeonIMU > Robot::m_gyro{};
+
+// Converts an angle <0 or >=360 to be within the range [0, 360)
+double constrainAngle(double angle) {
+  return std::fmod((std::fmod(angle, 360) + 360), 360);
+}
+
+// Returns the minimum angle change to get from startAngle to endAngle
+// e.g. minDifference(1, 359) == -2, instead of 358
+double minDifference(double startAngle, double endAngle) {
+  endAngle = constrainAngle(endAngle);
+  startAngle = constrainAngle(startAngle);
+
+  double temp = endAngle - startAngle;
+  double diff = temp;
+  if (temp > 180) {
+    diff -= 360;
+  }
+  if (temp < -180) {
+    diff += 360;
+  }
+
+  return diff;
+}
+
+// Returns the yaw value of the gyro (not constrained between 0 and 360 degrees)
+double Robot::getYaw() {
+  double ypr[3];
+  m_gyro->GetYawPitchRoll(ypr);
+  return ypr[0];
+}
+
+// Returns the yaw value of the gyro, converted to be between 0 and 360 degrees
+double Robot::getHeading() {
+  return constrainAngle(getHeading());
+}
 
 void Robot::RobotInit() {
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
@@ -48,6 +84,8 @@ void Robot::RobotInit() {
   m_manualManip = std::make_unique< ManualManip >(Robot::m_input.get());
 
   m_compressor = std::make_unique< frc::Compressor >(0);
+
+  m_gyro = std::make_unique< PigeonIMU >(10);
 
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);

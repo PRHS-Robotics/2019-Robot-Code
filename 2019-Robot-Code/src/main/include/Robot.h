@@ -38,6 +38,9 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
+  static double getYaw();
+  static double getHeading();
+
   void matchInit();
   void matchPeriodic();
 
@@ -65,4 +68,10 @@ class Robot : public frc::TimedRobot {
 
   static std::unique_ptr< ManualArm > m_manualArm;
   static std::unique_ptr< ManualManip > m_manualManip;
+
+  static std::unique_ptr< PigeonIMU > m_gyro;
 };
+
+double constrainAngle(double angle);
+
+double minDifference(double startAngle, double endAngle);
