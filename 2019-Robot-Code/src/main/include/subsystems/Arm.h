@@ -11,7 +11,14 @@ class Arm : public frc::Subsystem {
 public:
     Arm(int baseMotor, int baseSensorPort, int wristMotor, int wristSensor, int stopSwitchPort);
 
+    void setMode(bool calibration);
+
+    void setArmSetpoint(double setpoint);
+
     void setLevel(int level);
+
+    double getArmSetpoint() const;
+    double getWristSetpoint() const;
 
     int getLevel();
 
@@ -24,7 +31,11 @@ public:
     void setEnabled(bool enabled);
 
 private:
-    int m_level;
+    int m_level = 0;
+
+    bool m_calibration = false;
+
+    double m_armSetpoint = 0.0, m_wristSetpoint = 0.0;
     
     frc::AnalogInput   m_baseSensor;
     WPI_VictorSPX m_baseMotor;

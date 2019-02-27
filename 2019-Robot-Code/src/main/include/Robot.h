@@ -27,6 +27,7 @@
 #include "commands/ManualArm.h"
 #include "commands/ManualManip.h"
 #include "commands/Elevator.h"
+#include "commands/CalibrateArm.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -70,6 +71,8 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< ManualManip > m_manualManip;
 
   static std::unique_ptr< PigeonIMU > m_gyro;
+
+  static std::unique_ptr< CalibrateArm > m_calibrateArm;
 };
 
 double constrainAngle(double angle);

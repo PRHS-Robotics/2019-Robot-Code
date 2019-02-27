@@ -39,7 +39,8 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "ARM_RETRACT", { "Arm Retract", XBOX_BACK } },
 		{ "ARM_CARGO_INTAKE", { "Arm Cargo Intake", XBOX_X } },
 		{ "ARM_CARGO_LEVELS", { "Arm Cargo Levels", XBOX_LB } },
-		{ "ARM_HATCH_LEVELS", { "Arm Hatch Levels", XBOX_RB } }
+		{ "ARM_HATCH_LEVELS", { "Arm Hatch Levels", XBOX_RB } },
+		{ "ARM_CALIBRATE", { "Arm Calibration Mode", XBOX_START } }
 };
 
 

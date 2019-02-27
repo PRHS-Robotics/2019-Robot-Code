@@ -32,6 +32,8 @@ std::unique_ptr< ManualArm > Robot::m_manualArm{};
 
 std::unique_ptr< PigeonIMU > Robot::m_gyro{};
 
+std::unique_ptr< CalibrateArm > Robot::m_calibrateArm{};
+
 // Converts an angle <0 or >=360 to be within the range [0, 360)
 double constrainAngle(double angle) {
   return std::fmod((std::fmod(angle, 360) + 360), 360);
@@ -83,6 +85,8 @@ void Robot::RobotInit() {
 
   m_manualManip = std::make_unique< ManualManip >(Robot::m_input.get());
 
+  m_calibrateArm = std::make_unique< CalibrateArm >(Robot::m_input.get());
+
   m_compressor = std::make_unique< frc::Compressor >(0);
 
   m_gyro = std::make_unique< PigeonIMU >(10);
@@ -107,6 +111,8 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Manip Chooser", &m_manipulatorChooser);
   frc::SmartDashboard::PutData("Drive Chooser", &m_driveTrainChooser);
   frc::SmartDashboard::PutData("Pneumatic Chooser", &m_pneumaticChooser);
+
+  m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
 
   frc::CameraServer::GetInstance()->StartAutomaticCapture(0);
 }
