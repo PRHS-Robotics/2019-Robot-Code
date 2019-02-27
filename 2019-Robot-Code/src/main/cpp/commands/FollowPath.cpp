@@ -1,6 +1,7 @@
 #include "commands/FollowPath.h"
 #include "subsystems/DriveTrain.h"
 #include "Robot.h"
+#include <iostream>
 
 FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > rightData) :
     m_lFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
@@ -14,8 +15,10 @@ FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > r
 }
 
 void FollowPath::Initialize() {
-
     Robot::m_driveTrain->resetSensors();
+
+    m_lFollower = EncoderFollower{ 0, 0, 0, 0, 0 };
+    m_rFollower = EncoderFollower{ 0, 0, 0, 0, 0 };
 
     // TODO: Measure wheel circumference
     // TODO: Adjust gains
@@ -41,9 +44,13 @@ void FollowPath::Execute() {
         Robot::m_driveTrain->getEncoderPositions().second[1]
     );
 
-    // TODO: Apparently you need a gyro????
+    //std::cout << "Follower: " << desired_heading << ", Gyro: " << gyro_heading << "\n";
 
-    Robot::m_driveTrain->drive(l, r);
+    double angle_difference = minDifference(Robot::getHeading(), r2d(m_lFollower.heading));
+    
+    double turn = 1.0 * (-1.0/80.0) * angle_difference;
+
+    Robot::m_driveTrain->drive(l + turn, r - turn);
 }
 
 bool FollowPath::IsFinished() {
