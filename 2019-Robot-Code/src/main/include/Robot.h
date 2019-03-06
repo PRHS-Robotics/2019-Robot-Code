@@ -23,17 +23,17 @@
 #include <frc/DigitalOutput.h>
 #include <frc/AnalogInput.h>
 
-#include "commands/ApproachCargo.h"
-#include "commands/FollowPath.h"
+#include "commands/auto/ApproachCargo.h"
+#include "commands/auto/FollowPath.h"
+#include "commands/auto/DriveUntil.h"
+#include "commands/auto/LevelDriveUntil.h"
+#include "commands/auto/TurnToAngle.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
 #include "commands/ManualManip.h"
 #include "commands/Elevator.h"
 #include "commands/CalibrateArm.h"
-#include "commands/DriveUntil.h"
-#include "commands/LevelDriveUntil.h"
-#include "commands/TurnToAngle.h"
 
 class Robot : public frc::TimedRobot {
  public:

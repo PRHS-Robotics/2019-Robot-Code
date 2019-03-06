@@ -78,7 +78,7 @@ double Robot::getYaw() {
 
 // Returns the yaw value of the gyro, converted to be between 0 and 360 degrees
 double Robot::getHeading() {
-  return constrainAngle(getHeading());
+  return constrainAngle(getYaw());
 }
 
 void Robot::RobotInit() {
@@ -115,6 +115,8 @@ void Robot::RobotInit() {
 
   m_levelDriveUntil = std::make_unique< LevelDriveUntil >();
 
+  m_turnToAngle = std::make_unique< TurnToAngle >(0.0);
+
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
 
@@ -139,6 +141,7 @@ void Robot::RobotInit() {
   
   frc::SmartDashboard::PutData("Drive Until", m_driveUntil.get());
   frc::SmartDashboard::PutData("Level Drive Until", m_levelDriveUntil.get());
+  frc::SmartDashboard::PutData("Turn To Angle", m_turnToAngle.get());
 
   m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
 

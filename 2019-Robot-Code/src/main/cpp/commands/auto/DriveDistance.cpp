@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/DriveDistance.h"
+#include "commands/auto/DriveDistance.h"
 #include "Robot.h"
 
 constexpr const double MAX_ACCEL = 0.02;

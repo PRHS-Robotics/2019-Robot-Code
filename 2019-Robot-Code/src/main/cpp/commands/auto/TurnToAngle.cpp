@@ -5,8 +5,10 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/TurnToAngle.h"
+#include "commands/auto/TurnToAngle.h"
 #include "Robot.h"
+#include <iostream>
+#include <algorithm>
 
 TurnToAngle::TurnToAngle(double target) :
   m_target(constrainAngle(target)),
@@ -37,7 +39,7 @@ void TurnToAngle::Execute() {
 
 // Make this return true when this Command no longer needs to run execute()
 bool TurnToAngle::IsFinished() {
-  return minDifference(Robot::getHeading(), m_target) <= 0.1;
+  return std::abs(minDifference(Robot::getHeading(), m_target)) <= 0.1;
 }
 
 // Called once after isFinished returns true

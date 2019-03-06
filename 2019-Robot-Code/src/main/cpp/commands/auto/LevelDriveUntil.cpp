@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/LevelDriveUntil.h"
+#include "commands/auto/LevelDriveUntil.h"
 #include "commands/ManualArm.h"
 #include "Robot.h"
 

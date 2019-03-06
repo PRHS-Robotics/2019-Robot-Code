@@ -9,7 +9,7 @@
 
 #include <frc/commands/Command.h>
 #include "subsystems/Arm.h"
-#include "commands/DriveUntil.h"
+#include "commands/auto/DriveUntil.h"
 
 class LevelDriveUntil : public DriveUntil {
 public:

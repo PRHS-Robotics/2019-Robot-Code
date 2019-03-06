@@ -1,4 +1,4 @@
-#include "commands/ApproachCargo.h"
+#include "commands/auto/ApproachCargo.h"
 #include "subsystems/DriveTrain.h"
 #include "Robot.h"
 

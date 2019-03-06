@@ -1,4 +1,4 @@
-#include "commands/FollowPath.h"
+#include "commands/auto/FollowPath.h"
 #include "subsystems/DriveTrain.h"
 #include "Robot.h"
 #include <iostream>

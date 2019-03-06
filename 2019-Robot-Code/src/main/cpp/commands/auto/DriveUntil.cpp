@@ -5,7 +5,7 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/DriveUntil.h"
+#include "commands/auto/DriveUntil.h"
 #include "Robot.h"
 
 const double maxOutput = 0.2;

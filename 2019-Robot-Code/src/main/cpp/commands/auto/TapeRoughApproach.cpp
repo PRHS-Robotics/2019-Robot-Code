@@ -5,9 +5,9 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/TapeRoughApproach.h"
-#include "commands/TurnToAngle.h"
-#include "commands/DriveDistance.h"
+#include "commands/auto/TapeRoughApproach.h"
+#include "commands/auto/TurnToAngle.h"
+#include "commands/auto/DriveDistance.h"
 
 #include <iostream>
 #include <sstream>
