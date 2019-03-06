@@ -48,13 +48,46 @@ std::pair< std::array< int, 3 >, std::array< int, 3 > > DriveTrain::getEncoderPo
 	return { lPositions, rPositions };
 }
 
-#define M(X) std::make_unique< WPI_TalonSRX >(X)
+void DriveTrain::configurePID() {
+#define M(SIDE, IDX, FGAIN) (m_##SIDE##Motors)[0]->Config_kF(0, FGAIN, 10) 
+	M(l, 0, 0.0);
+	M(l, 1, 0.0);
+	M(l, 2, 0.0);
 
+	M(r, 0, 0.0);
+	M(r, 1, 0.0);
+	M(r, 2, 0.0);
+#undef M
+}
+
+void DriveTrain::logVelocities(double power) {
+	if (power == 0) {
+		return;
+	}
+
+	const std::size_t samples = 5;
+
+	static std::array< MovingAverage, std::tuple_size< decltype(DriveTrain::m_lMotors) >::value > lAvgVelocity{ MovingAverage(samples), MovingAverage(samples), MovingAverage(samples) };
+	static std::array< MovingAverage, std::tuple_size< decltype(DriveTrain::m_rMotors) >::value > rAvgVelocity{ MovingAverage(samples), MovingAverage(samples), MovingAverage(samples) };
+
+	for (int i = 0; i < m_lMotors.size(); ++i) {
+		double velocity = lAvgVelocity[i].Process(m_lMotors[i]->GetSelectedSensorVelocity(0));
+		std::cout << "Velocity: " << velocity << ", F Gain: " << 1023 * power / velocity << "\n";
+	}
+	for (int i = 0; i < m_rMotors.size(); ++i) {
+		double velocity = rAvgVelocity[i].Process(m_rMotors[i]->GetSelectedSensorVelocity(0));
+		std::cout << "Velocity: " << velocity << ", F Gain: " << 1023 * power / velocity << "\n";
+	}
+	std::cout << "----------------\n";
+}
+
+#define M(X) std::make_unique< WPI_TalonSRX >(X)
 DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight, int midRight, int backRight) :
 	m_lMotors{ M(frontLeft), M(midLeft), M(backLeft) },
 	m_rMotors{ M(frontRight), M(midRight), M(backRight) },
 	Subsystem("DriveTrain")
 {
+#undef M
 	if (!frc::SmartDashboard::SetDefaultBoolean("Left Sensor Phase", false)) {
 		std::cout << "Setting default left side phase\n";
 		setLeftSidePhase(false);
@@ -103,6 +136,8 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		talon->ConfigClosedloopRamp(0.0, 10);
 	}
 
+	configurePID();
+
 	/*
 	m_frontLeft.Config_kF(0, 16.771, 10);
 	m_frontLeft.Config_kP(0, 16.771 / 2.0, 10);
@@ -134,9 +169,11 @@ void DriveTrain::resetSensors() {
 	}
 }
 
+const double turnSensitivity = 0.25;
+
 void DriveTrain::drive(InputState state) {
-	double lSpeed = -state.y + state.r;
-	double rSpeed = -state.y - state.r;
+	double lSpeed = -state.y + state.r * turnSensitivity;
+	double rSpeed = -state.y - state.r * turnSensitivity;
 	lSpeed = std::max(std::min(lSpeed, 1.0), -1.0);
 	rSpeed = std::max(std::min(rSpeed, 1.0), -1.0);
 
@@ -181,6 +218,8 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) 
 	
 	const double MAX_PERCENT = 1.0;
 
+	//logVelocities(leftSpeed);
+
 	if (percentOutput) {
 		for (auto& motor : m_lMotors) {
 			motor->Set(ControlMode::PercentOutput, leftSpeed * MAX_PERCENT);
@@ -198,7 +237,7 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) 
 		}
 	}
 
-	static std::array< MovingAverage, 3 > lVelocity{ MovingAverage{30}, {30}, {30} };
+	/*static std::array< MovingAverage, 3 > lVelocity{ MovingAverage{30}, {30}, {30} };
 	static std::array< MovingAverage, 3 > rVelocity{ MovingAverage{30}, {30}, {30} };
 	for (int i = 0; i < 3; ++i) {
 		std::string lKey = "Left Side Velocity " + i;
@@ -207,7 +246,7 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) 
 		double rValue = m_rMotors[i]->GetSelectedSensorVelocity(0);
 		frc::SmartDashboard::PutNumber(lKey, lVelocity[i].Process(lValue));
 		frc::SmartDashboard::PutNumber(rKey, rVelocity[i].Process(rValue));
-	}
+	}*/
 
 	frc::SmartDashboard::PutNumber("Left Side Set Speed", leftSpeed);
 	frc::SmartDashboard::PutNumber("Right Side Set Speed", rightSpeed);

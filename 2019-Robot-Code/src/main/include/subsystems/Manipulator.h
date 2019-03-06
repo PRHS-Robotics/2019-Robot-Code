@@ -3,6 +3,7 @@
 #include <frc/commands/Subsystem.h>
 #include <frc/Solenoid.h>
 #include <frc/DigitalInput.h>
+#include <frc/Talon.h>
 #include "rev/SparkMax.h"
 
 class Manipulator : public frc::Subsystem {
@@ -18,9 +19,10 @@ public:
     void Periodic() override;
 
 private:
-    double m_cargoDir; 
+    double m_cargoDir;
 
-    rev::SparkMax m_cargoMotor;
+    /*rev::SparkMax m_cargoMotor;*/
+    frc::Talon m_cargoMotor;
     frc::Solenoid m_extendSolenoid;
     frc::Solenoid m_retractSolenoid;
     frc::DigitalInput m_stopSwitch;

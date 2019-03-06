@@ -42,6 +42,10 @@ private:
 	bool rightSidePhase() const;
 	void setRightSidePhase(bool phase);
 
+	void configurePID();
+
+	void logVelocities(double power);
+
 	std::array< std::unique_ptr< WPI_TalonSRX >, 3 > m_lMotors;
 	std::array< std::unique_ptr< WPI_TalonSRX >, 3 > m_rMotors;
 };

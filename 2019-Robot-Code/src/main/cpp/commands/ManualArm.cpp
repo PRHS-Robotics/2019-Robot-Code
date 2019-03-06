@@ -11,8 +11,47 @@ ManualArm::ManualArm(Input *input) :
 }
 
 void ManualArm::Initialize() {
-    Robot::m_arm->setLevel(0);
-    Robot::m_arm->setEnabled(true);
+    Robot::m_arm->setLevel(Level::Home);
+}
+
+Level getLevel(Input *input) {
+    bool cargoMode = buttonValue(input->getInput(), "ARM_CARGO_LEVELS");
+    bool hatchMode = buttonValue(input->getInput(), "ARM_HATCH_LEVELS");
+
+    if (buttonValue(input->getInput(), "ARM_HATCH_FLOOR")) {
+        return HatchFloorIntake;
+    }
+
+    if (cargoMode || hatchMode) {
+        if (buttonValue(input->getInput(), "ARM_LEVEL_1")) {
+            return (cargoMode ? Level::CargoLevel1 : Level::HatchLevel1);
+        }
+        if (buttonValue(input->getInput(), "ARM_LEVEL_2")) {
+            return (cargoMode ? Level::CargoLevel2 : Level::HatchLevel2);
+        }
+        if (buttonValue(input->getInput(), "ARM_LEVEL_3")) {
+            return (cargoMode ? Level::CargoLevel3 : Level::HatchLevel3);
+        }
+    }
+
+    if (buttonValue(input->getInput(), "ARM_CARGOSHIP")) {
+        return Level::CargoShip;
+    }
+
+    if (buttonValue(input->getInput(), "ARM_RETRACT")) {
+        return Robot::m_manipulator->hasCargo() ? Level::CargoHome : Level::Home;
+    }
+
+    if (Robot::m_manipulator->hasCargo()) {
+        if (Robot::m_arm->getLevel() == Level::CargoFloorIntake) {
+            return Level::CargoHome;
+        }
+    }
+    else if (buttonValue(input->getInput(), "ARM_CARGO_INTAKE")) {
+        return Level::CargoFloorIntake;
+    }
+
+    return LEVEL_COUNT;
 }
 
 void ManualArm::Execute() {
@@ -34,38 +73,12 @@ void ManualArm::Execute() {
         m_debounce = false;
     }*/
 
-    bool cargoMode = buttonValue(m_input->getInput(), "ARM_CARGO_LEVELS");
-    bool hatchMode = buttonValue(m_input->getInput(), "ARM_HATCH_LEVELS");
-
-    if (cargoMode || hatchMode) {
-        if (buttonValue(m_input->getInput(), "ARM_LEVEL_1")) {
-            Robot::m_arm->setLevel(2 + cargoMode);
-        }
-        if (buttonValue(m_input->getInput(), "ARM_LEVEL_2")) {
-            Robot::m_arm->setLevel(4 + cargoMode);
-        }
-        if (buttonValue(m_input->getInput(), "ARM_LEVEL_3")) {
-            Robot::m_arm->setLevel(6 + cargoMode);
-        }
+    Level level = getLevel(m_input);
+    if (level != LEVEL_COUNT) {
+        Robot::m_arm->setLevel(level);
     }
 
 
-    if (m_input->getInput().pov2 == 90) {
-        Robot::m_arm->setLevel(8);
-    }
-
-    if (buttonValue(m_input->getInput(), "ARM_RETRACT")) {
-        Robot::m_arm->setLevel(Robot::m_manipulator->hasCargo() ? 9 : 0);
-    }
-
-    if (Robot::m_manipulator->hasCargo()) {
-        if (Robot::m_arm->getLevel() == 1) {
-            Robot::m_arm->setLevel(9);
-        }
-    }
-    else if (buttonValue(m_input->getInput(), "ARM_CARGO_INTAKE")) {
-        Robot::m_arm->setLevel(1);
-    }
 }
 
 bool ManualArm::IsFinished() {
@@ -73,7 +86,7 @@ bool ManualArm::IsFinished() {
 }
 
 void ManualArm::End() {
-    Robot::m_arm->setLevel(0);
+    Robot::m_arm->setLevel(Level::Home);
 
     // DO NOT CALL setEnabled(false); THE ARM WILL FALL!
 }

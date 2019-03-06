@@ -8,20 +8,25 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <fstream>
 
-const int LEVEL_COUNT = 10;
 /*const double BASE_SENSOR_VALUES[LEVEL_COUNT] = { 2.8, 2.933, 3.375, 3.817, 4.310, 2.974, 3.441, 3.947 };
 const double WRIST_SENSOR_VALUES[LEVEL_COUNT] = { 3.93, 3.508, 3.443, 3.473, 3.309, 3.872, 3.4787, 3.680 };*/
 std::array< double, LEVEL_COUNT > BASE_SENSOR_VALUES =  { 2.461, 2.771, /*2.713*/2.733, 3.071, 3.217, 3.518, 3.697, 3.968, 3.327, 2.461 };
 std::array< double, LEVEL_COUNT > WRIST_SENSOR_VALUES = { 2.563, 3.029, /*2.665*/2.665, 3.061, 2.765, 3.146, 2.859, 3.176, 3.156, 2.669 };
 const double DIFFERENCE = 0.0;
 
-const double arm_lower_output_limit = -0.05;
-const double arm_upper_output_limit =  0.40;
+const double arm_lower_output_limit = /*-0.05*/-0.05;
+const double arm_upper_output_limit = /* 0.40*/ 0.30;
 const double arm_max_change = 0.005;
 
-const double wrist_lower_output_limit = /*-0.20*/-0.20;
+const double wrist_lower_output_limit = /*-0.20*/-0.30;
 const double wrist_upper_output_limit = /* 0.15*/ 0.15;
 const double wrist_max_change = 0.005;
+
+const double armMinValue = 2.4;
+const double armMaxValue = 4.2;
+
+const double wristMinValue = 2.53;
+const double wristMaxValue = 3.2;
 
 static const double calculateArmFGain(double setpoint) {
     static const double arm_center_voltage = /*TODO*/3.209;
@@ -31,6 +36,31 @@ static const double calculateArmFGain(double setpoint) {
     return factor * std::cos(angle) / setpoint;
 }
 
+void Arm::reloadValues() {
+    std::ifstream file("/home/lvuser/arm_settings.txt");
+
+    assert(file.good());
+
+    int size;
+    file >> size;
+
+    std::cout << "Reading values\n";
+    for (int i = 0; i < size; ++i) {
+        double value;
+        file >> value;
+        BASE_SENSOR_VALUES[i] = value;
+        std::cout << value << "\n";
+    }
+    std::cout << "Wrist values\n";
+    for (int i = 0; i < size; ++i) {
+        double value;
+        file >> value;
+        WRIST_SENSOR_VALUES[i] = value;
+        std::cout << value << "\n";
+    }
+    std::cout << "Done reading\n";
+}
+
 Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int stopSwitchPort) :
     m_baseSensor(baseSensor),
     m_wristSensor(wristSensor),
@@ -38,12 +68,15 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int sto
     m_wristMotor(wristMotor),
     m_basePID(8.0, 0.0, 0.0, m_baseSensor, m_baseMotor),
     m_wristPID(5.0, 0.0, 0.0, m_wristSensor, m_wristMotor),
-    m_level(0),
+    m_level(Level::Home),
     m_stopSwitch(stopSwitchPort),
     Subsystem("ARM")
 {
     m_baseSensor.SetAverageBits(8);
     m_wristSensor.SetAverageBits(8);
+
+    m_baseMotor.SetInverted(false);
+    m_wristMotor.SetInverted(true); // SET TO FALSE ON COMP ROBOT
 
     m_basePID.SetOutputRange(arm_lower_output_limit, arm_upper_output_limit);
     m_wristPID.SetOutputRange(wrist_lower_output_limit, wrist_upper_output_limit);
@@ -56,26 +89,21 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int sto
     m_basePID.SetSetpoint(BASE_SENSOR_VALUES[0]);
     m_wristPID.SetSetpoint(WRIST_SENSOR_VALUES[0]);
 
-    std::ifstream file("/home/lvuser/arm_settings.txt");
-
-    assert(file.good());
-
-    int size;
-    file >> size;
-    assert(size == BASE_SENSOR_VALUES.size());
-
-    for (auto& value : BASE_SENSOR_VALUES) {
-        file >> value;
-    }
-    for (auto& value : WRIST_SENSOR_VALUES) {
-        file >> value;
-    }
+    reloadValues();
 
     frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
 
 void Arm::setArmSetpoint(double setpoint) {
-    m_armSetpoint = setpoint;
+    m_calibration = true;
+
+    m_armSetpoint = std::max(armMinValue, std::min(armMaxValue, setpoint));
+}
+
+void Arm::setWristSetpoint(double setpoint) {
+    m_calibration = true;
+
+    m_wristSetpoint = std::max(wristMinValue, std::min(wristMaxValue, setpoint));
 }
 
 void Arm::setEnabled(bool enabled) {
@@ -89,8 +117,10 @@ void Arm::setEnabled(bool enabled) {
     }
 }
 
-void Arm::setLevel(int level) {
-    if (level < 0 || level >= LEVEL_COUNT) {
+void Arm::setLevel(Level level) {
+    m_calibration = false;
+
+    if (level < Level::Home || level >= Level::LEVEL_COUNT) {
         return;
     }
 
@@ -99,7 +129,7 @@ void Arm::setLevel(int level) {
     setMode(false);
 }
 
-int Arm::getLevel() {
+Level Arm::getLevel() {
     return m_level;
 }
 
@@ -136,23 +166,33 @@ void Arm::Periodic() {
     }
 
     if (m_calibration) {
-        m_basePID.SetSetpoint(m_armSetpoint);
-        m_basePID.SetF(calculateArmFGain(m_armSetpoint));
+        double armLimitedSetpoint = std::max(armMinValue, std::min(armMaxValue, m_armSetpoint));
+        m_basePID.SetSetpoint(armLimitedSetpoint);
+        m_basePID.SetF(calculateArmFGain(armLimitedSetpoint));
+
+        double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, m_wristSetpoint));
+        m_wristPID.SetSetpoint(wristLimitedSetpoint);
     } else {
         double currentWrist = m_wristPID.GetSetpoint();
-        double targetWrist = WRIST_SENSOR_VALUES[m_level];
+        double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
         if (std::abs(targetWrist - currentWrist) < wrist_max_change) {
             currentWrist = targetWrist;
         }
         else {
             currentWrist += wrist_max_change * signum(targetWrist - currentWrist);
         }
-        m_wristPID.SetSetpoint(currentWrist);
+
+        if (Robot::m_input->getInput().pov2 == 0) {
+            currentWrist -= 0.03;
+        }
+
+        double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, currentWrist));
+        m_wristPID.SetSetpoint(wristLimitedSetpoint);
 
         // Allows for gradual change of arm and wrist target position
         double currentArm = m_basePID.GetSetpoint();
-        double targetArm = BASE_SENSOR_VALUES[m_level];
-        if (WRIST_SENSOR_VALUES[m_level] <= WRIST_SENSOR_VALUES[9] && currentWrist != targetWrist) {
+        double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+        if (WRIST_SENSOR_VALUES[static_cast< int >(m_level)] <= WRIST_SENSOR_VALUES[9] && currentWrist != targetWrist) {
             targetArm = currentArm;
         }
         if (std::abs(targetArm - currentArm) < arm_max_change) {
@@ -161,9 +201,12 @@ void Arm::Periodic() {
         else {
             currentArm += arm_max_change * signum(targetArm - currentArm);
         }
-        m_basePID.SetSetpoint(currentArm);
-        m_basePID.SetF(calculateArmFGain(currentArm));
+
+        double armLimitedSetpoint = std::max(armMinValue, std::min(armMaxValue, currentArm));
+        m_basePID.SetSetpoint(armLimitedSetpoint);
+        m_basePID.SetF(calculateArmFGain(armLimitedSetpoint));
         frc::SmartDashboard::PutNumber("Arm Feedforward", calculateArmFGain(currentArm));
+        frc::SmartDashboard::PutNumber("Arm Base Goal", targetArm);
     }
 
 

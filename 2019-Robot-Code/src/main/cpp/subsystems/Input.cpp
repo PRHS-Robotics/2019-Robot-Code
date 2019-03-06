@@ -38,9 +38,11 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "ARM_LEVEL_3", { "Arm Level 3", XBOX_Y } },
 		{ "ARM_RETRACT", { "Arm Retract", XBOX_BACK } },
 		{ "ARM_CARGO_INTAKE", { "Arm Cargo Intake", XBOX_X } },
-		{ "ARM_CARGO_LEVELS", { "Arm Cargo Levels", XBOX_LB } },
-		{ "ARM_HATCH_LEVELS", { "Arm Hatch Levels", XBOX_RB } },
-		{ "ARM_CALIBRATE", { "Arm Calibration Mode", XBOX_START } }
+		{ "ARM_CARGO_LEVELS", { "Arm Cargo Levels", XBOX_RB } },
+		{ "ARM_HATCH_LEVELS", { "Arm Hatch Levels", XBOX_LB } },
+		{ "ARM_CALIBRATE", { "Arm Calibration Mode", XBOX_START } },
+		{ "ARM_HATCH_FLOOR", { "Arm Hatch Floor Level", XBOX_R } },
+		{ "ARM_CARGOSHIP", { "Arm Cargoship", XBOX_L } }
 };
 
 
@@ -121,6 +123,7 @@ InputState Input::getRawInput() {
 		secondary.GetRawAxis(3),
 		secondary.GetRawAxis(4),
 		secondary.GetRawAxis(5),
+		primary.GetPOV(),
 		secondary.GetPOV(),
 		0
 	};

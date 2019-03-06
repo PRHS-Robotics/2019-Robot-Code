@@ -24,7 +24,7 @@ constexpr const std::size_t MAX_BUTTONS = MAX_PRIMARY_BUTTONS + MAX_SECONDARY_BU
 // Stores the current state of the joystick & xbox controller axes, buttons, etc.
 struct InputState {
 	double x, y, r, t, lx, ly, ltrig, rtrig, rx, ry;
-	int pov2;
+	int pov1, pov2;
 	std::bitset< MAX_BUTTONS > buttons;
 };
 

@@ -8,27 +8,40 @@
 #pragma once
 
 #include <frc/commands/Command.h>
-#include "subsystems/Input.h"
+#include <frc/PIDController.h>
 
-class CalibrateArm : public frc::Command {
+class DriveUntil : public frc::Command {
 public:
-  CalibrateArm(Input *input);
+  DriveUntil(double targetDistance);
   void Initialize() override;
   void Execute() override;
   bool IsFinished() override;
   void End() override;
   void Interrupted() override;
 
+  double m_targetDistance;
+  
 private:
-  Input *m_input;
+  /*class DriveTrainOutput : public frc::PIDOutput {
+  public:
+    void PIDWrite(double output) override;
+  };
 
-  static constexpr const std::size_t LEVEL_COUNT = 11;
+  class UltrasonicInput : public frc::PIDSource {
+  public:
+    UltrasonicInput();
 
-  std::array< double, LEVEL_COUNT > m_baseSensorValues = { 0 };
-  std::array< double, LEVEL_COUNT > m_wristSensorValues = { 0 };
+    double PIDGet() override;
 
-  void saveValues();
-  void readValues();
+    ~UltrasonicInput() override = default;
 
-  bool m_debounce = false;
+  private:
+    double m_lastDistance;
+  };
+
+  DriveTrainOutput m_pidOutput;
+  UltrasonicInput m_pidInput;
+
+  frc::PIDController m_controller;*/
+
 };

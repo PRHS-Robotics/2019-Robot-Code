@@ -19,6 +19,9 @@
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
 #include <frc/Compressor.h>
+#include <frc/SerialPort.h>
+#include <frc/DigitalOutput.h>
+#include <frc/AnalogInput.h>
 
 #include "commands/ApproachCargo.h"
 #include "commands/FollowPath.h"
@@ -28,11 +31,16 @@
 #include "commands/ManualManip.h"
 #include "commands/Elevator.h"
 #include "commands/CalibrateArm.h"
+#include "commands/DriveUntil.h"
+#include "commands/LevelDriveUntil.h"
+#include "commands/TurnToAngle.h"
 
 class Robot : public frc::TimedRobot {
  public:
   void RobotInit() override;
   void RobotPeriodic() override;
+  void DisabledInit() override;
+  void DisabledPeriodic() override;
   void AutonomousInit() override;
   void AutonomousPeriodic() override;
   void TeleopInit() override;
@@ -73,6 +81,18 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< PigeonIMU > m_gyro;
 
   static std::unique_ptr< CalibrateArm > m_calibrateArm;
+
+  static std::unique_ptr< frc::SerialPort > m_cameraSerial;
+
+  static std::unique_ptr< frc::DigitalOutput > m_lights;
+
+  static std::unique_ptr< frc::AnalogInput > m_ultrasonic;
+
+  static std::unique_ptr< DriveUntil > m_driveUntil;
+
+  static std::unique_ptr< LevelDriveUntil > m_levelDriveUntil;
+
+  static std::unique_ptr< TurnToAngle > m_turnToAngle;
 };
 
 double constrainAngle(double angle);

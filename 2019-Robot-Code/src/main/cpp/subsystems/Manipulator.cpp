@@ -25,10 +25,19 @@ void Manipulator::setExtended(bool extended) {
 }
 
 void Manipulator::Periodic() {
+    double temp = m_cargoDir;
+    if (temp < 0.0) {
+        temp *= 0.8;
+    }
+    else if (temp > 0.0) {
+        temp *= 0.7;
+    }
+
+
     if (!m_stopSwitch.Get()) {
-        m_cargoMotor.Set(std::min(m_cargoDir, 0.0));
+        m_cargoMotor.Set(std::min(temp, 0.0));
     }
     else {
-        m_cargoMotor.Set(m_cargoDir);
+        m_cargoMotor.Set(temp);
     }
 }

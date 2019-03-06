@@ -4,6 +4,8 @@
 
 #include "frc/commands/Command.h"
 
+enum Level{ Home, CargoFloorIntake, HatchLevel1, CargoLevel1, HatchLevel2, CargoLevel2, HatchLevel3, CargoLevel3, CargoShip, CargoHome, HatchFloorIntake, LEVEL_COUNT };
+
 class ManualArm : public frc::Command {
 public:
     ManualArm(Input *input);
@@ -23,3 +25,6 @@ private:
 
     bool m_debounce = false;
 };
+
+
+Level getLevel(Input *input);

@@ -6,6 +6,9 @@
 #include <frc/PIDController.h>
 #include <frc/DigitalInput.h>
 
+#include "commands/ManualArm.h"
+
+
 // makes the arm do the arm things
 class Arm : public frc::Subsystem {
 public:
@@ -14,13 +17,16 @@ public:
     void setMode(bool calibration);
 
     void setArmSetpoint(double setpoint);
+    void setWristSetpoint(double setpoint);
 
-    void setLevel(int level);
+    void setLevel(Level level);
+
+    void reloadValues();
 
     double getArmSetpoint() const;
     double getWristSetpoint() const;
 
-    int getLevel();
+    Level getLevel();
 
     std::pair< double, double > getSensorValues();
 
@@ -31,7 +37,7 @@ public:
     void setEnabled(bool enabled);
 
 private:
-    int m_level = 0;
+    Level m_level = Level::Home;
 
     bool m_calibration = false;
 

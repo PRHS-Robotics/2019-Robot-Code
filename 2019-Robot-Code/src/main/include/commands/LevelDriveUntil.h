@@ -8,27 +8,12 @@
 #pragma once
 
 #include <frc/commands/Command.h>
-#include "subsystems/Input.h"
+#include "subsystems/Arm.h"
+#include "commands/DriveUntil.h"
 
-class CalibrateArm : public frc::Command {
+class LevelDriveUntil : public DriveUntil {
 public:
-  CalibrateArm(Input *input);
+  LevelDriveUntil();
+
   void Initialize() override;
-  void Execute() override;
-  bool IsFinished() override;
-  void End() override;
-  void Interrupted() override;
-
-private:
-  Input *m_input;
-
-  static constexpr const std::size_t LEVEL_COUNT = 11;
-
-  std::array< double, LEVEL_COUNT > m_baseSensorValues = { 0 };
-  std::array< double, LEVEL_COUNT > m_wristSensorValues = { 0 };
-
-  void saveValues();
-  void readValues();
-
-  bool m_debounce = false;
 };

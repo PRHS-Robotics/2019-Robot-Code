@@ -7,27 +7,16 @@
 
 #pragma once
 
-#include <frc/commands/Command.h>
+#include <frc/commands/CommandGroup.h>
 
-class DriveDistance : public frc::Command {
+class TapeRoughApproach : public frc::CommandGroup {
 public:
-  DriveDistance(double dist);
-  void Initialize() override;
-  void Execute() override;
-  bool IsFinished() override;
-  void End() override;
-  void Interrupted() override;
-
-  double targetDistance = 0.0;
-
-  double distanceError();
+  TapeRoughApproach();
 
 private:
-  double m_encoderOffset = 0.0;
-  double m_angle = 0.0;
-  
-  double m_speed = 0.0;
-
-  double averageEncoderValue();
-  double targetSpeed();
+  struct Path {
+    double angle1;
+    double distance;
+    double angle2;
+  };
 };

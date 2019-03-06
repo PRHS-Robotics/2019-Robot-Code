@@ -14,7 +14,8 @@ constexpr const double HIGH_SPEED = 0.3;
 constexpr const double LOW_SPEED = 0.1;
 constexpr const double ERROR_THRESHOLD = 10.0;
 
-DriveDistance::DriveDistance() :
+DriveDistance::DriveDistance(double dist) :
+  targetDistance(dist),
   frc::Command("DriveDistance", *Robot::m_driveTrain)
 {
 
