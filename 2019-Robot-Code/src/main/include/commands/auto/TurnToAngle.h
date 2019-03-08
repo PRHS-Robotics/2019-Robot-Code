@@ -23,4 +23,5 @@ public:
 
 private:
   double m_target;
+  double m_error;
 }; 

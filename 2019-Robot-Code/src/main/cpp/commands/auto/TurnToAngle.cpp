@@ -10,6 +10,8 @@
 #include <iostream>
 #include <algorithm>
 
+const double maxTurnPower = 0.5;
+
 TurnToAngle::TurnToAngle(double target) :
   m_target(constrainAngle(target)),
   frc::Command("TurnToAngle", *Robot::m_driveTrain) {
@@ -32,14 +34,18 @@ void TurnToAngle::Initialize() {}
 void TurnToAngle::Execute() {
   double angle_difference = minDifference(Robot::getHeading(), m_target);
   
-  double turn = 1.0 * (-1.0/80.0) * angle_difference;
+  double turn = 1.0 * (-1.0/20.0) * angle_difference;
+
+  turn = std::max(-maxTurnPower, std::min(maxTurnPower, turn));
 
   Robot::m_driveTrain->drive(turn, -turn);
 }
 
 // Make this return true when this Command no longer needs to run execute()
 bool TurnToAngle::IsFinished() {
-  return std::abs(minDifference(Robot::getHeading(), m_target)) <= 0.1;
+  bool newResult = std::abs(minDifference(Robot::getHeading(), m_target)) <= 1.0;
+  static bool lastResult = false;
+  return std::exchange(lastResult, newResult) && newResult;
 }
 
 // Called once after isFinished returns true

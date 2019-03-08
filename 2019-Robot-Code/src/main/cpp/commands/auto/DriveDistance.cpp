@@ -11,7 +11,7 @@
 constexpr const double MAX_ACCEL = 0.02;
 constexpr const double SLOW_THRESHOLD = 4000.0;
 constexpr const double HIGH_SPEED = 0.3;
-constexpr const double LOW_SPEED = 0.1;
+constexpr const double LOW_SPEED = 0.2;
 constexpr const double ERROR_THRESHOLD = 10.0;
 
 DriveDistance::DriveDistance(double dist) :
@@ -24,13 +24,17 @@ DriveDistance::DriveDistance(double dist) :
 double DriveDistance::averageEncoderValue() {
   auto positions = Robot::m_driveTrain->getEncoderPositions();
   double temp = 0.0;
-  for (double pos : positions.first) {
+  /*for (double pos : positions.first) {
     temp += pos;
   }
   for (double pos : positions.second) {
     temp += pos;
   }
-  temp /= 6.0;
+  temp /= 6.0;*/
+  
+  temp += positions.first[2];
+  temp += positions.second[2];
+  temp /= 2.0;
 
   return temp;
 }

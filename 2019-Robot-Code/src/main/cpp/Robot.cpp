@@ -46,6 +46,10 @@ std::unique_ptr< LevelDriveUntil > Robot::m_levelDriveUntil{};
 
 std::unique_ptr< TurnToAngle > Robot::m_turnToAngle{};
 
+std::unique_ptr< DriveDistance > Robot::m_driveDistance{};
+
+std::unique_ptr< TapeRoughApproach > Robot::m_tapeRoughApproach{};
+
 // Converts an angle <0 or >=360 to be within the range [0, 360)
 double constrainAngle(double angle) {
   return std::fmod((std::fmod(angle, 360) + 360), 360);
@@ -117,6 +121,10 @@ void Robot::RobotInit() {
 
   m_turnToAngle = std::make_unique< TurnToAngle >(0.0);
 
+  m_driveDistance = std::make_unique< DriveDistance >(250.0);
+
+  m_tapeRoughApproach = std::make_unique< TapeRoughApproach >();
+
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
 
@@ -142,6 +150,8 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Drive Until", m_driveUntil.get());
   frc::SmartDashboard::PutData("Level Drive Until", m_levelDriveUntil.get());
   frc::SmartDashboard::PutData("Turn To Angle", m_turnToAngle.get());
+  frc::SmartDashboard::PutData("Drive Distance", m_driveDistance.get());
+  frc::SmartDashboard::PutData("Tape Rough Approach", m_tapeRoughApproach.get());
 
   m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
 
@@ -177,6 +187,8 @@ void Robot::RobotPeriodic() {
   frc::SmartDashboard::PutNumber("Ultrasonic", m_ultrasonic->GetVoltage() / (5.0 / 512.0));
 
   frc::SmartDashboard::PutNumber("Gyro Heading", getYaw());
+
+  frc::SmartDashboard::PutNumber("Encoder Position", m_driveTrain->getEncoderPositions().second[2]);
 }
 
 /**
@@ -198,7 +210,9 @@ void Robot::matchInit() {
 
   m_arm->reloadValues();
 
-  m_lights->UpdateDutyCycle(0.1);
+  m_lights->UpdateDutyCycle(1.0);
+
+  m_gyro->SetYaw(90.0, 10.0);
 
   std::cout << "Starting teleop\n";
   if (m_testModeChooser.GetSelected()) {
@@ -233,6 +247,8 @@ void Robot::matchInit() {
   }
   else {
     std::cout << "Running in competition mode\n";
+
+    m_arm->setEnabled(true);
     m_manualControl->Start();
     m_manualArm->Start();
     m_manualManip->Start();
@@ -243,8 +259,9 @@ void Robot::matchInit() {
 void Robot::matchPeriodic() {
   frc::Scheduler::GetInstance()->Run();
 
-  /*if (m_cameraSerial) {
+  if (m_cameraSerial) {
     int bytes = m_cameraSerial->GetBytesReceived();
+    frc::SmartDashboard::PutNumber("Serial Bytes", bytes);
     if (bytes != 0) {
       std::cout << "bytes: " << bytes << "\n";
       char buffer[27] = { 0 };
@@ -252,7 +269,7 @@ void Robot::matchPeriodic() {
       std::cout << "Read " << readCount << " bytes, buffer contents:\n";
       std::cout << buffer << "\n";
     }
-  }*/
+  }
 }
 
 void Robot::AutonomousInit() {

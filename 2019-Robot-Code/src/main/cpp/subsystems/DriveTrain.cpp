@@ -125,6 +125,8 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 
 		talon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
 		talon->ConfigClosedloopRamp(0.0, 10);
+
+		talon->SetSensorPhase(true);
 	}
 	for (auto& talon : m_rMotors) {
 		talon->ConfigNominalOutputForward(0, 10);
@@ -134,6 +136,8 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 
 		talon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
 		talon->ConfigClosedloopRamp(0.0, 10);
+
+		talon->SetSensorPhase(true);
 	}
 
 	configurePID();

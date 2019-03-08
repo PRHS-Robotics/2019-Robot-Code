@@ -28,6 +28,8 @@
 #include "commands/auto/DriveUntil.h"
 #include "commands/auto/LevelDriveUntil.h"
 #include "commands/auto/TurnToAngle.h"
+#include "commands/auto/DriveDistance.h"
+#include "commands/auto/TapeRoughApproach.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
@@ -93,6 +95,10 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< LevelDriveUntil > m_levelDriveUntil;
 
   static std::unique_ptr< TurnToAngle > m_turnToAngle;
+
+  static std::unique_ptr< DriveDistance > m_driveDistance;
+
+  static std::unique_ptr< TapeRoughApproach > m_tapeRoughApproach;
 };
 
 double constrainAngle(double angle);

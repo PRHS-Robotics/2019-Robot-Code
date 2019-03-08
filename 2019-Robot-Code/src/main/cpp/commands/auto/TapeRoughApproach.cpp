@@ -81,7 +81,12 @@ Pose calcTargetPosition(Pose tapePosition) {
 }
 
 TapeRoughApproach::TapeRoughApproach() {
-  Path path; // TODO
+  double x = 1.0, y = 2.0;
+  Path path{ 0.0, 0.0, 0.0 }; // TODO
+
+  path.angle1 = std::atan2(y, x) * 360.0 / (2 * M_PI);
+  path.distance = 250.0 * std::sqrt(x * x + y * y);
+  path.angle2 = 0.0;
 
   AddSequential(new TurnToAngle(path.angle1));
   AddSequential(new DriveDistance(path.distance));
