@@ -31,7 +31,7 @@ void DriveUntil::Initialize() {
 
 // Called repeatedly when this Command is scheduled to run
 void DriveUntil::Execute() {
-  if (Robot::m_ultrasonic->GetVoltage() / (5.0 / 512.0) - m_targetDistance >= 21.0) {
+  if (Robot::ultrasonicDistance() - m_targetDistance >= 21.0) {
     Robot::m_driveTrain->drive(0.4, 0.4);
   }
   else {

@@ -13,12 +13,6 @@
 #include <iostream>
 #include <sstream>
 
-struct Pose {
-  double x;
-  double y;
-  double angle;
-};
-
 struct CameraData {
   double yaw;
   double distance;

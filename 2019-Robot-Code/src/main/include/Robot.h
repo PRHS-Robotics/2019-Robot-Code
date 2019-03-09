@@ -51,6 +51,8 @@ class Robot : public frc::TimedRobot {
 
   static double getYaw();
   static double getHeading();
+  
+  static double ultrasonicDistance();
 
   void matchInit();
   void matchPeriodic();
@@ -89,6 +91,7 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< frc::DigitalOutput > m_lights;
 
   static std::unique_ptr< frc::AnalogInput > m_ultrasonic;
+  static std::unique_ptr< frc::AnalogInput > m_ultrasonic2;
 
   static std::unique_ptr< DriveUntil > m_driveUntil;
 

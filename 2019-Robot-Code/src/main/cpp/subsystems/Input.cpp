@@ -98,7 +98,7 @@ Input::Input(int primaryPort, int secondaryPort) :
 	for (const auto& button : defaultButtonMap) {
 		frc::SmartDashboard::SetPersistent(button.second.first);
 		if (!isValidMap(button.first)) {
-			frc::SmartDashboard::PutNumber(button.second.first, button.second.second);
+			//frc::SmartDashboard::PutNumber(button.second.first, button.second.second);
 		}
 	}
 

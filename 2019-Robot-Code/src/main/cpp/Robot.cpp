@@ -41,6 +41,7 @@ std::unique_ptr< frc::DigitalOutput > Robot::m_lights{};
 std::unique_ptr< frc::SerialPort > Robot::m_cameraSerial{};
 
 std::unique_ptr< frc::AnalogInput > Robot::m_ultrasonic{};
+std::unique_ptr< frc::AnalogInput > Robot::m_ultrasonic2{};
 
 std::unique_ptr< LevelDriveUntil > Robot::m_levelDriveUntil{};
 
@@ -85,6 +86,10 @@ double Robot::getHeading() {
   return constrainAngle(getYaw());
 }
 
+double Robot::ultrasonicDistance() {
+  return std::min(m_ultrasonic->GetVoltage(), m_ultrasonic2->GetVoltage()) / (5.0 / 512.0);
+}
+
 void Robot::RobotInit() {
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
   m_input = std::make_unique< Input >(0, 1);
@@ -114,6 +119,9 @@ void Robot::RobotInit() {
 
   m_ultrasonic = std::make_unique< frc::AnalogInput >(3);
   m_ultrasonic->SetAverageBits(8);
+
+  m_ultrasonic2 = std::make_unique< frc::AnalogInput >(2);
+  m_ultrasonic2->SetAverageBits(8);
 
   m_driveUntil = std::make_unique< DriveUntil >(40.0);
 

@@ -9,6 +9,13 @@
 
 #include <frc/commands/CommandGroup.h>
 
+
+struct Pose {
+  double x;
+  double y;
+  double angle;
+};
+
 class TapeRoughApproach : public frc::CommandGroup {
 public:
   TapeRoughApproach();
