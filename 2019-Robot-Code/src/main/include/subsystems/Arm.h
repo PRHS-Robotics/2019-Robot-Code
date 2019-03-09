@@ -41,6 +41,8 @@ private:
 
     bool m_calibration = false;
 
+    bool m_wristRetract = false;
+
     double m_armSetpoint = 0.0, m_wristSetpoint = 0.0;
     
     frc::AnalogInput   m_baseSensor;

@@ -30,6 +30,7 @@
 #include "commands/auto/TurnToAngle.h"
 #include "commands/auto/DriveDistance.h"
 #include "commands/auto/TapeRoughApproach.h"
+#include "commands/auto/SnapAngle.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
@@ -54,6 +55,8 @@ class Robot : public frc::TimedRobot {
   
   static double ultrasonicDistance();
 
+  static double ultrasonicDistance(int sensor);
+
   void matchInit();
   void matchPeriodic();
 
@@ -65,6 +68,8 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser< int > m_pneumaticChooser;
 
   static std::unique_ptr< frc::Compressor > m_compressor;
+
+  static std::unique_ptr< SnapAngle > m_snapAngle;
 
   static std::unique_ptr< DriveTrain > m_driveTrain;
   static std::unique_ptr< ElevatorDriveTrain > m_elevatordrivetrain;

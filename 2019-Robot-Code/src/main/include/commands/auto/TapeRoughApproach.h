@@ -18,7 +18,7 @@ struct Pose {
 
 class TapeRoughApproach : public frc::CommandGroup {
 public:
-  TapeRoughApproach();
+  TapeRoughApproach(const std::string& data);
 
 private:
   struct Path {

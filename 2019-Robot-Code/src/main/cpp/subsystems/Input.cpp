@@ -24,7 +24,7 @@ enum ButtonId {
 };
 
 static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
-		{ "SHIFT_FAST", { "High Speed", 3 }, },
+		{ "ALIGN", { "Align To Target", 3 } },
 		{ "SHIFT_SLOW", { "Low Speed", 5 }, },
 		{ "TRIGGER", 	{ "Trigger", 1 } },
 		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
@@ -98,7 +98,7 @@ Input::Input(int primaryPort, int secondaryPort) :
 	for (const auto& button : defaultButtonMap) {
 		frc::SmartDashboard::SetPersistent(button.second.first);
 		if (!isValidMap(button.first)) {
-			//frc::SmartDashboard::PutNumber(button.second.first, button.second.second);
+			frc::SmartDashboard::PutNumber(button.second.first, button.second.second);
 		}
 	}
 

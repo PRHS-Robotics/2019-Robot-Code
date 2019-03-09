@@ -9,6 +9,7 @@
 #include "Robot.h"
 #include <iostream>
 #include <algorithm>
+#include <SmartDashboard/SmartDashboard.h>
 
 const double maxTurnPower = 0.5;
 
@@ -28,13 +29,23 @@ double TurnToAngle::getTarget() const {
 }
 
 // Called just before this Command runs the first time
-void TurnToAngle::Initialize() {}
+void TurnToAngle::Initialize() {
+  m_error = 0.0;
+}
 
 // Called repeatedly when this Command is scheduled to run
 void TurnToAngle::Execute() {
   double angle_difference = minDifference(Robot::getHeading(), m_target);
+
+  std::cout << "angle diff: " << angle_difference << "\n";
+
+  m_error += angle_difference;
+
+  frc::SmartDashboard::PutNumber("Angle Error", m_error);
   
-  double turn = 1.0 * (-1.0/20.0) * angle_difference;
+  double turn = 1.0 * (-1.0/20.0) * (angle_difference + m_error);
+
+  frc::SmartDashboard::PutNumber("Turn", turn);
 
   turn = std::max(-maxTurnPower, std::min(maxTurnPower, turn));
 
@@ -44,6 +55,7 @@ void TurnToAngle::Execute() {
 // Make this return true when this Command no longer needs to run execute()
 bool TurnToAngle::IsFinished() {
   bool newResult = std::abs(minDifference(Robot::getHeading(), m_target)) <= 1.0;
+  std::cout << "heading: " << Robot::getHeading() << ", " << minDifference(Robot::getHeading(), m_target) << "\n";
   static bool lastResult = false;
   return std::exchange(lastResult, newResult) && newResult;
 }

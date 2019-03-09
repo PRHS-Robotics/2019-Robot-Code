@@ -51,6 +51,8 @@ std::unique_ptr< DriveDistance > Robot::m_driveDistance{};
 
 std::unique_ptr< TapeRoughApproach > Robot::m_tapeRoughApproach{};
 
+std::unique_ptr< SnapAngle > Robot::m_snapAngle{};
+
 // Converts an angle <0 or >=360 to be within the range [0, 360)
 double constrainAngle(double angle) {
   return std::fmod((std::fmod(angle, 360) + 360), 360);
@@ -87,7 +89,16 @@ double Robot::getHeading() {
 }
 
 double Robot::ultrasonicDistance() {
-  return std::min(m_ultrasonic->GetVoltage(), m_ultrasonic2->GetVoltage()) / (5.0 / 512.0);
+  return std::min(ultrasonicDistance(0), ultrasonicDistance(1));
+}
+
+double Robot::ultrasonicDistance(int sensor) {
+  if (sensor) {
+    return m_ultrasonic2->GetVoltage() / (5.0 / 512.0);
+  }
+  else {
+    return m_ultrasonic->GetVoltage() / (5.0 / 512.0);
+  }
 }
 
 void Robot::RobotInit() {
@@ -131,7 +142,13 @@ void Robot::RobotInit() {
 
   m_driveDistance = std::make_unique< DriveDistance >(250.0);
 
-  m_tapeRoughApproach = std::make_unique< TapeRoughApproach >();
+  m_snapAngle = std::make_unique< SnapAngle >();
+  
+  std::cout << "Hello wolrd\n";
+
+  m_tapeRoughApproach = std::make_unique< TapeRoughApproach >("Tape None");
+
+  std::cout << "aahahsahsa\n";
 
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
@@ -148,6 +165,7 @@ void Robot::RobotInit() {
 
   m_pneumaticChooser.SetDefaultOption("DisabledCompressor", 0);
   m_pneumaticChooser.AddOption("EnabledCompressor", 1);
+  std::cout << "e\n";
 
   frc::SmartDashboard::PutData("Mode Chooser", &m_testModeChooser);
   frc::SmartDashboard::PutData("Arm Chooser", &m_armChooser);
@@ -161,11 +179,16 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Drive Distance", m_driveDistance.get());
   frc::SmartDashboard::PutData("Tape Rough Approach", m_tapeRoughApproach.get());
 
+  std::cout << "g\n";
   m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
+  std::cout << "c\n";
+
+  m_input->getButton("ALIGN")->WhenPressed(m_snapAngle.get());
 
   m_driveTrain->SetDefaultCommand(m_manualControl.get());
+  std::cout << "b\n";
 
-  //frc::CameraServer::GetInstance()->StartAutomaticCapture(0);
+  frc::CameraServer::GetInstance()->StartAutomaticCapture(1);
 }
 
 void Robot::DisabledInit() {
@@ -192,7 +215,8 @@ void Robot::RobotPeriodic() {
   frc::SmartDashboard::PutNumber("Arm Base Analog", armSensors.first);
   frc::SmartDashboard::PutNumber("Arm Wrist Analog", armSensors.second);
 
-  frc::SmartDashboard::PutNumber("Ultrasonic", m_ultrasonic->GetVoltage() / (5.0 / 512.0));
+
+  frc::SmartDashboard::PutNumber("Ultrasonic", ultrasonicDistance());
 
   frc::SmartDashboard::PutNumber("Gyro Heading", getYaw());
 
@@ -262,22 +286,42 @@ void Robot::matchInit() {
     m_manualManip->Start();
     m_compressor->Start();
   }
+
+  if (m_cameraSerial) {
+    // setcam autoexp 1\nsetcam absexp 10\n
+    const char buf[] = "setpar serout All\nsetpar serlog None\n";
+    m_cameraSerial->Write(buf, sizeof(buf)-1);
+  }
 }
 
 void Robot::matchPeriodic() {
-  frc::Scheduler::GetInstance()->Run();
+  *m_snapAngle = SnapAngle{};
 
   if (m_cameraSerial) {
     int bytes = m_cameraSerial->GetBytesReceived();
     frc::SmartDashboard::PutNumber("Serial Bytes", bytes);
     if (bytes != 0) {
+      char buffer[100] = { 0 };
+      int readCount = m_cameraSerial->Read(buffer, sizeof(buffer) - 1);
       std::cout << "bytes: " << bytes << "\n";
-      char buffer[27] = { 0 };
-      int readCount = m_cameraSerial->Read(buffer, 26);
       std::cout << "Read " << readCount << " bytes, buffer contents:\n";
       std::cout << buffer << "\n";
+
+      char *result = std::remove_if(buffer, buffer + sizeof(buffer), [](char c) {
+        return c == '\r' || c == '\n';
+      });
+
+      if (result != buffer + sizeof(buffer)) {
+        *result = 0;
+      }
+
+      if (buffer != std::string("Tape None") && buffer != std::string("OK")) {
+        *m_tapeRoughApproach = TapeRoughApproach(buffer);
+      }
     }
   }
+
+  frc::Scheduler::GetInstance()->Run();
 }
 
 void Robot::AutonomousInit() {

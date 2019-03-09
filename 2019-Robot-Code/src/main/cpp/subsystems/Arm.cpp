@@ -14,13 +14,13 @@ std::array< double, LEVEL_COUNT > BASE_SENSOR_VALUES =  { 2.461, 2.771, /*2.713*
 std::array< double, LEVEL_COUNT > WRIST_SENSOR_VALUES = { 2.563, 3.029, /*2.665*/2.665, 3.061, 2.765, 3.146, 2.859, 3.176, 3.156, 2.669 };
 const double DIFFERENCE = 0.0;
 
-const double arm_lower_output_limit = /*-0.05*/-0.05;
-const double arm_upper_output_limit = /* 0.40*/ 0.30;
-const double arm_max_change = 0.005;
+const double arm_lower_output_limit = /*-0.05*/-0.60;
+const double arm_upper_output_limit = /* 0.40*/ 0.80;
+const double arm_max_change = 0.015;
 
-const double wrist_lower_output_limit = /*-0.20*/-0.30;
-const double wrist_upper_output_limit = /* 0.15*/ 0.15;
-const double wrist_max_change = 0.005;
+const double wrist_lower_output_limit = /*-0.20*/-0.40;
+const double wrist_upper_output_limit = /* 0.15*/ 0.50;
+const double wrist_max_change = 0.010;
 
 const double armMinValue = 2.4;
 const double armMaxValue = 4.2;
@@ -75,6 +75,12 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int sto
     m_baseSensor.SetAverageBits(8);
     m_wristSensor.SetAverageBits(8);
 
+    m_baseMotor.ConfigVoltageCompSaturation(10.0, 10);
+    m_wristMotor.ConfigVoltageCompSaturation(10.0, 10);
+
+    m_baseMotor.EnableVoltageCompensation(true);
+    m_wristMotor.EnableVoltageCompensation(true);
+
     m_baseMotor.SetInverted(false);
     m_wristMotor.SetInverted(true); // SET TO FALSE ON COMP ROBOT
 
@@ -119,6 +125,7 @@ void Arm::setEnabled(bool enabled) {
 
 void Arm::setLevel(Level level) {
     m_calibration = false;
+    m_wristRetract = false;
 
     if (level < Level::Home || level >= Level::LEVEL_COUNT) {
         return;
@@ -182,7 +189,9 @@ void Arm::Periodic() {
             currentWrist += wrist_max_change * signum(targetWrist - currentWrist);
         }
 
-        if (Robot::m_input->getInput().pov2 == 0) {
+        m_wristRetract |= Robot::m_input->getInput().pov2 == 0;
+
+        if (m_wristRetract) {
             currentWrist -= 0.03;
         }
 

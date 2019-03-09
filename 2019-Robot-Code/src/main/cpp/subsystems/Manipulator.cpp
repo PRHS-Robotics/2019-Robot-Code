@@ -27,10 +27,10 @@ void Manipulator::setExtended(bool extended) {
 void Manipulator::Periodic() {
     double temp = m_cargoDir;
     if (temp < 0.0) {
-        temp *= 0.8;
+        temp *= 1.0;
     }
     else if (temp > 0.0) {
-        temp *= 0.7;
+        temp *= 0.7 * 0.75;
     }
 
 

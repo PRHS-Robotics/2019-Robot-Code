@@ -52,7 +52,13 @@ CameraData parseBallData(std::string cameraOutput) {
 }
 
 CameraData parseCameraOutput(const std::string& cameraOutput) {
-  assert(cameraOutput.size() > 4);
+  for (char c : cameraOutput) {
+    std::cout << std::hex << static_cast< int >(c) << ", ";
+  }
+  std::cout << "\n";
+  if (cameraOutput == "Tape None" || cameraOutput == "OK") {
+    return CameraData{ 0.0, 0.0 };
+  }
 
   if (cameraOutput.substr(0, 4) == "Tape") {
     return parseTapeData(cameraOutput);
@@ -74,14 +80,14 @@ Pose calcTapePosition(CameraData data) {
   double y = data.distance * std::sin(absAngle * (2.0 * M_PI / 360.0));
 
   // Snap tape angle to nearest multiple of 45 degrees
-  double angle = std::round(absAngle / 45.0) * 45.0;
+  double angle = calcAngle(absAngle);
 
   return Pose{ x, y, angle };
 }
 
 Pose calcTargetPosition(Pose tapePosition) {
   // TODO: Determine arm radius
-  double radius = 2.0;
+  double radius = 0.1;
 
   double x = tapePosition.x - radius * std::cos(tapePosition.angle * (2.0 * M_PI / 360.0));
   double y = tapePosition.y - radius * std::sin(tapePosition.angle * (2.0 * M_PI / 360.0));
@@ -92,7 +98,7 @@ Pose calcTargetPosition(Pose tapePosition) {
 TapeRoughApproach::Path TapeRoughApproach::getPath(Pose target) {
   Path path;
   path.angle1 = std::atan2(target.y, target.x) * 360.0 / (2.0 * M_PI);
-  path.distance = 250.0 * std::sqrt(target.x * target.x + target.y * target.y);
+  path.distance = std::sqrt(target.x * target.x + target.y * target.y);
   path.angle2 = target.angle;
 
   path.angle1 = constrainAngle(path.angle1);
@@ -100,11 +106,12 @@ TapeRoughApproach::Path TapeRoughApproach::getPath(Pose target) {
   return path;
 }
 
-TapeRoughApproach::TapeRoughApproach() {
-  CameraData data{ 10.0, 1.0 };
-  Path path = getPath(calcTargetPosition(calcTapePosition(data)));
+TapeRoughApproach::TapeRoughApproach(const std::string& data) {
+  Path path = getPath(calcTargetPosition(calcTapePosition(parseCameraOutput(data))));
+
+  std::cout << "path:\n" << path.angle1 << "\n" << path.distance << "\n" << path.angle2 << "\n";
 
   AddSequential(new TurnToAngle(path.angle1));
-  AddSequential(new DriveDistance(path.distance));
+  AddSequential(new DriveDistance(250.0 * path.distance));
   AddSequential(new TurnToAngle(path.angle2));
 }
