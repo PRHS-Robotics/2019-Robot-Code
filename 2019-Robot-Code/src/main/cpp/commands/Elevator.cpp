@@ -21,7 +21,7 @@ Elevator::Elevator(Input *input) :
 
 // Called just before this Command runs the first time
 void Elevator::Initialize() {
-  //std::cout << "YEEET";
+  
 }
 
 // Called repeatedly when this Command is scheduled to run
