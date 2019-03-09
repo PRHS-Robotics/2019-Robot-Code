@@ -8,6 +8,7 @@
 #include "commands/auto/TapeRoughApproach.h"
 #include "commands/auto/TurnToAngle.h"
 #include "commands/auto/DriveDistance.h"
+#include "Robot.h"
 
 #include <iostream>
 #include <sstream>
@@ -73,38 +74,43 @@ CameraData parseCameraOutput(const std::string& cameraOutput) {
 }
 
 Pose calcTapePosition(CameraData data) {
-  
+  double absAngle = data.yaw + Robot::getHeading();
+
+  double x = data.distance * std::cos(absAngle * (2.0 * M_PI / 360.0));
+  double y = data.distance * std::sin(absAngle * (2.0 * M_PI / 360.0));
+
+  // Snap tape angle to nearest multiple of 45 degrees
+  double angle = std::round(absAngle / 45.0) * 45.0;
+
+  return Pose{ x, y, angle };
 }
 
 Pose calcTargetPosition(Pose tapePosition) {
+  // TODO: Determine arm radius
+  double radius = 2.0;
 
+  double x = tapePosition.x - radius * std::cos(tapePosition.angle * (2.0 * M_PI / 360.0));
+  double y = tapePosition.y - radius * std::sin(tapePosition.angle * (2.0 * M_PI / 360.0));
+
+  return Pose{ x, y, tapePosition.angle };
+}
+
+TapeRoughApproach::Path TapeRoughApproach::getPath(Pose target) {
+  Path path;
+  path.angle1 = std::atan2(target.y, target.x) * 360.0 / (2.0 * M_PI);
+  path.distance = 250.0 * std::sqrt(target.x * target.x + target.y * target.y);
+  path.angle2 = target.angle;
+
+  path.angle1 = constrainAngle(path.angle1);
+  path.angle2 = constrainAngle(path.angle2);
+  return path;
 }
 
 TapeRoughApproach::TapeRoughApproach() {
-  double x = 1.0, y = 2.0;
-  Path path{ 0.0, 0.0, 0.0 }; // TODO
-
-  path.angle1 = std::atan2(y, x) * 360.0 / (2 * M_PI);
-  path.distance = 250.0 * std::sqrt(x * x + y * y);
-  path.angle2 = 0.0;
+  CameraData data{ 10.0, 1.0 };
+  Path path = getPath(calcTargetPosition(calcTapePosition(data)));
 
   AddSequential(new TurnToAngle(path.angle1));
   AddSequential(new DriveDistance(path.distance));
   AddSequential(new TurnToAngle(path.angle2));
-  // Add Commands here:
-  // e.g. AddSequential(new Command1());
-  //      AddSequential(new Command2());
-  // these will run in order.
-
-  // To run multiple commands at the same time,
-  // use AddParallel()
-  // e.g. AddParallel(new Command1());
-  //      AddSequential(new Command2());
-  // Command1 and Command2 will run in parallel.
-
-  // A command group will require all of the subsystems that each member
-  // would require.
-  // e.g. if Command1 requires chassis, and Command2 requires arm,
-  // a CommandGroup containing them would require both the chassis and the
-  // arm.
 }

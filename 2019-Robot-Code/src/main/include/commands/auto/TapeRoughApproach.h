@@ -19,4 +19,6 @@ private:
     double distance;
     double angle2;
   };
+
+  Path getPath(Pose target);
 };
