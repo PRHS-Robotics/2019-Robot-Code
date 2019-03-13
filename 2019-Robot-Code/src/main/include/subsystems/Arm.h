@@ -36,6 +36,8 @@ public:
 
     void setEnabled(bool enabled);
 
+    bool setpointReached();
+
 private:
     Level m_level = Level::Home;
 

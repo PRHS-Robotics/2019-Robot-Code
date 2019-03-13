@@ -31,6 +31,7 @@
 #include "commands/auto/DriveDistance.h"
 #include "commands/auto/TapeRoughApproach.h"
 #include "commands/auto/SnapAngle.h"
+#include "commands/auto/HatchIntake.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
@@ -107,6 +108,8 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< DriveDistance > m_driveDistance;
 
   static std::unique_ptr< TapeRoughApproach > m_tapeRoughApproach;
+
+  static std::unique_ptr< HatchIntake > m_hatchIntake;
 };
 
 double constrainAngle(double angle);

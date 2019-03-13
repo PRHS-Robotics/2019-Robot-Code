@@ -53,6 +53,8 @@ std::unique_ptr< TapeRoughApproach > Robot::m_tapeRoughApproach{};
 
 std::unique_ptr< SnapAngle > Robot::m_snapAngle{};
 
+std::unique_ptr< HatchIntake > Robot::m_hatchIntake{};
+
 // Converts an angle <0 or >=360 to be within the range [0, 360)
 double constrainAngle(double angle) {
   return std::fmod((std::fmod(angle, 360) + 360), 360);
@@ -89,19 +91,21 @@ double Robot::getHeading() {
 }
 
 double Robot::ultrasonicDistance() {
-  return std::min(ultrasonicDistance(0), ultrasonicDistance(1));
+  return std::min(ultrasonicDistance(0), ultrasonicDistance(0));
 }
 
 double Robot::ultrasonicDistance(int sensor) {
   if (sensor) {
-    return m_ultrasonic2->GetVoltage() / (5.0 / 512.0);
+    return m_ultrasonic2->GetAverageVoltage() / (5.0 / 512.0);
   }
   else {
-    return m_ultrasonic->GetVoltage() / (5.0 / 512.0);
+    return m_ultrasonic->GetAverageVoltage() / (5.0 / 512.0);
   }
 }
 
 void Robot::RobotInit() {
+  std::cout << "Hello, world\n";
+
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
   m_input = std::make_unique< Input >(0, 1);
 
@@ -131,7 +135,7 @@ void Robot::RobotInit() {
   m_ultrasonic = std::make_unique< frc::AnalogInput >(3);
   m_ultrasonic->SetAverageBits(8);
 
-  m_ultrasonic2 = std::make_unique< frc::AnalogInput >(2);
+  m_ultrasonic2 = std::make_unique< frc::AnalogInput >(5);
   m_ultrasonic2->SetAverageBits(8);
 
   m_driveUntil = std::make_unique< DriveUntil >(40.0);
@@ -140,15 +144,13 @@ void Robot::RobotInit() {
 
   m_turnToAngle = std::make_unique< TurnToAngle >(0.0);
 
-  m_driveDistance = std::make_unique< DriveDistance >(250.0);
+  m_driveDistance = std::make_unique< DriveDistance >(1.0);
 
   m_snapAngle = std::make_unique< SnapAngle >();
-  
-  std::cout << "Hello wolrd\n";
+
+  m_hatchIntake = std::make_unique< HatchIntake >();
 
   m_tapeRoughApproach = std::make_unique< TapeRoughApproach >("Tape None");
-
-  std::cout << "aahahsahsa\n";
 
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
@@ -178,17 +180,15 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Turn To Angle", m_turnToAngle.get());
   frc::SmartDashboard::PutData("Drive Distance", m_driveDistance.get());
   frc::SmartDashboard::PutData("Tape Rough Approach", m_tapeRoughApproach.get());
+  frc::SmartDashboard::PutData("Hatch Intake", m_hatchIntake.get());
 
-  std::cout << "g\n";
   m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
-  std::cout << "c\n";
-
   m_input->getButton("ALIGN")->WhenPressed(m_snapAngle.get());
+  m_input->getButton("DEBUG_BUTTON")->WhenPressed(m_hatchIntake.get());
 
   m_driveTrain->SetDefaultCommand(m_manualControl.get());
-  std::cout << "b\n";
 
-  frc::CameraServer::GetInstance()->StartAutomaticCapture(1);
+  frc::CameraServer::GetInstance()->StartAutomaticCapture(1).SetVideoMode(cs::VideoMode::PixelFormat::kYUYV, 320, 240, 30);
 }
 
 void Robot::DisabledInit() {
@@ -217,10 +217,22 @@ void Robot::RobotPeriodic() {
 
 
   frc::SmartDashboard::PutNumber("Ultrasonic", ultrasonicDistance());
+  frc::SmartDashboard::PutNumber("Ultrasonic1", ultrasonicDistance(0));
+  frc::SmartDashboard::PutNumber("Ultrasonic2", ultrasonicDistance(1));
 
-  frc::SmartDashboard::PutNumber("Gyro Heading", getYaw());
+  //frc::SmartDashboard::PutNumber("Gyro Heading", getYaw());
 
-  frc::SmartDashboard::PutNumber("Encoder Position", m_driveTrain->getEncoderPositions().second[2]);
+  auto positions = m_driveTrain->getEncoderPositions();
+
+  for (int i : positions.first) {
+    std::cout << i << ", ";
+  }
+  for (int i : positions.second) {
+    std::cout << i << ", ";
+  }
+  std::cout << "\n";
+
+  frc::SmartDashboard::PutNumber("Encoder Position", m_driveTrain->getEncoderPosition(false, 0));
 }
 
 /**
@@ -289,13 +301,14 @@ void Robot::matchInit() {
 
   if (m_cameraSerial) {
     // setcam autoexp 1\nsetcam absexp 10\n
-    const char buf[] = "setpar serout All\nsetpar serlog None\n";
-    m_cameraSerial->Write(buf, sizeof(buf)-1);
+    std::cout << "Writing\n";
+    const char buf[] = "setcam autowb 0\nsetcam autogain 0\nsetcam gain 16\nsetcam redbal 110\nsetcam bluebal 170\nsetcam autoexp 1\nsetcam absexp 15\nsetpar serout All\n";
+    m_cameraSerial->Write(buf, sizeof(buf));
   }
 }
 
 void Robot::matchPeriodic() {
-  *m_snapAngle = SnapAngle{};
+  //*m_snapAngle = SnapAngle{};
 
   if (m_cameraSerial) {
     int bytes = m_cameraSerial->GetBytesReceived();
@@ -303,9 +316,9 @@ void Robot::matchPeriodic() {
     if (bytes != 0) {
       char buffer[100] = { 0 };
       int readCount = m_cameraSerial->Read(buffer, sizeof(buffer) - 1);
-      std::cout << "bytes: " << bytes << "\n";
-      std::cout << "Read " << readCount << " bytes, buffer contents:\n";
-      std::cout << buffer << "\n";
+      //std::cout << "bytes: " << bytes << "\n";
+      //std::cout << "Read " << readCount << " bytes, buffer contents:\n";
+      //std::cout << buffer << "\n";
 
       char *result = std::remove_if(buffer, buffer + sizeof(buffer), [](char c) {
         return c == '\r' || c == '\n';
@@ -316,7 +329,19 @@ void Robot::matchPeriodic() {
       }
 
       if (buffer != std::string("Tape None") && buffer != std::string("OK")) {
-        *m_tapeRoughApproach = TapeRoughApproach(buffer);
+
+        CameraData data = parseCameraOutput(buffer);
+
+        frc::SmartDashboard::PutNumber("Tape X", data.x);
+        frc::SmartDashboard::PutNumber("Tape Y", data.y);
+
+        double distance = 0.0469096 * data.y * data.y - 18.0531 * data.y + 1762.49;
+        double yaw = (data.x - 159.5) / 320.0 * 65.0;
+
+        *m_tapeRoughApproach = TapeRoughApproach(distance, yaw);
+
+        frc::SmartDashboard::PutNumber("Tape Distance", distance);
+        frc::SmartDashboard::PutNumber("Tape Yaw", yaw);
       }
     }
   }

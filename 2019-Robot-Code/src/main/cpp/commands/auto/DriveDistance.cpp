@@ -15,14 +15,14 @@ constexpr const double LOW_SPEED = 0.2;
 constexpr const double ERROR_THRESHOLD = 10.0;
 
 DriveDistance::DriveDistance(double dist) :
-  targetDistance(dist),
+  targetDistance(dist * 250.0),
   frc::Command("DriveDistance", *Robot::m_driveTrain)
 {
 
 }
 
 double DriveDistance::averageEncoderValue() {
-  auto positions = Robot::m_driveTrain->getEncoderPositions();
+  //auto positions = Robot::m_driveTrain->getEncoderPositions();
   double temp = 0.0;
   /*for (double pos : positions.first) {
     temp += pos;
@@ -32,9 +32,11 @@ double DriveDistance::averageEncoderValue() {
   }
   temp /= 6.0;*/
   
-  temp += positions.first[2];
+  /*temp += positions.first[2];
   temp += positions.second[2];
-  temp /= 2.0;
+  temp /= 2.0;*/
+
+  temp = Robot::m_driveTrain->getEncoderPosition(true, 2);
 
   return temp;
 }
@@ -47,19 +49,21 @@ void DriveDistance::Initialize() {
 }
 
 double DriveDistance::distanceError() {
-  return (averageEncoderValue() - m_encoderOffset) - targetDistance;
+  return targetDistance - (averageEncoderValue() - m_encoderOffset);
 }
 
 double DriveDistance::targetSpeed() {
   if (IsFinished()) {
     return 0.0;
   }
+
+  double sign = (distanceError() < 0.0) ? -1.0 : 1.0;
   
   if (distanceError() < SLOW_THRESHOLD) {
-    return LOW_SPEED;
+    return sign * LOW_SPEED;
   }
   else {
-    return HIGH_SPEED;
+    return sign * HIGH_SPEED;
   }
 }
 

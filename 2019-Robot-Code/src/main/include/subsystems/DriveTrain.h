@@ -26,6 +26,8 @@ public:
 
 	void drive(double leftSpeed, double rightSpeed, bool percentOutput = true);
 
+	int getEncoderPosition(bool right, int index);
+
 	std::pair< std::array< int, 3 >, std::array< int, 3 > > getEncoderPositions();
 
 	void resetSensors();

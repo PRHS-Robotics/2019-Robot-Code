@@ -42,7 +42,7 @@ void DriveUntil::Execute() {
 // Make this return true when this Command no longer needs to run execute()
 bool DriveUntil::IsFinished() {
   //return m_controller.OnTarget();
-  return (Robot::m_ultrasonic->GetAverageVoltage() / (5.0 / 512.0)) - m_targetDistance <= 5.0;
+  return Robot::ultrasonicDistance() - m_targetDistance <= 5.0;
 }
 
 // Called once after isFinished returns true

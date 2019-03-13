@@ -7,31 +7,19 @@
 
 #pragma once
 
-#include <frc/commands/CommandGroup.h>
+#include <frc/commands/Command.h>
 
-struct CameraData {
-  double x;
-  double y;
-};
+#include "commands/ManualArm.h"
 
-struct Pose {
-  double x;
-  double y;
-  double angle;
-};
-
-CameraData parseCameraOutput(const std::string& cameraOutput);
-
-class TapeRoughApproach : public frc::CommandGroup {
+class SetLevel : public frc::Command {
 public:
-  TapeRoughApproach(double distance, double yaw);
+  SetLevel(Level level);
+  void Initialize() override;
+  void Execute() override;
+  bool IsFinished() override;
+  void End() override;
+  void Interrupted() override;
 
 private:
-  struct Path {
-    double angle1;
-    double distance;
-    double angle2;
-  };
-
-  Path getPath(Pose target);
+  Level m_level;
 };

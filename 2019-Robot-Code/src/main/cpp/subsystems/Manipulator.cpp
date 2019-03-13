@@ -1,5 +1,6 @@
 #include "subsystems/Manipulator.h"
 #include <frc/commands/Scheduler.h>
+#include "Robot.h"
 
 Manipulator::Manipulator(int motorPort, int extendSolenoidPort, int retractSolenoidPort, int switchPort) :
     m_cargoMotor(motorPort),
@@ -25,12 +26,18 @@ void Manipulator::setExtended(bool extended) {
 }
 
 void Manipulator::Periodic() {
+    if (Robot::m_arm->getLevel() == Level::CargoHome || Robot::m_arm->getLevel() == Level::Home) {
+        m_cargoMotor.Set(0.0);
+        setExtended(false);
+        return;
+    }
+
     double temp = m_cargoDir;
     if (temp < 0.0) {
-        temp *= 1.0;
+        temp *= 0.7 * 0.75;
     }
     else if (temp > 0.0) {
-        temp *= 0.7 * 0.75;
+        temp *= 1.0;
     }
 
 

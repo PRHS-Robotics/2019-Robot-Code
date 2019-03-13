@@ -13,29 +13,24 @@
 #include <iostream>
 #include <sstream>
 
-struct CameraData {
-  double yaw;
-  double distance;
-};
-
-CameraData parseTapeData(std::string cameraOutput) {
+CameraData parseTapeData(const std::string& cameraOutput) {
   std::istringstream stream(cameraOutput);
 
-  // Ignore prefix "Tape Distance: "
-  stream.ignore(15);
+  // Ignore prefix "Tape X: "
+  stream.ignore(8);
 
-  double distance = 0.0;
+  double x;
 
-  stream >> distance;
+  stream >> x;
 
-  // Ignore ", Yaw: "
-  stream.ignore(9);
+  // Ignore ", Y: "
+  stream.ignore(5);
 
-  double yaw = 0.0;
+  double y;
 
-  stream >> yaw;
+  stream >> y;
 
-  return CameraData{ yaw, distance };
+  return CameraData{ x, y };
 }
 
 CameraData parseBallData(std::string cameraOutput) {
@@ -52,13 +47,10 @@ CameraData parseBallData(std::string cameraOutput) {
 }
 
 CameraData parseCameraOutput(const std::string& cameraOutput) {
-  for (char c : cameraOutput) {
-    std::cout << std::hex << static_cast< int >(c) << ", ";
-  }
-  std::cout << "\n";
   if (cameraOutput == "Tape None" || cameraOutput == "OK") {
     return CameraData{ 0.0, 0.0 };
   }
+  //std::cout << cameraOutput << "\n";
 
   if (cameraOutput.substr(0, 4) == "Tape") {
     return parseTapeData(cameraOutput);
@@ -67,14 +59,15 @@ CameraData parseCameraOutput(const std::string& cameraOutput) {
     return parseBallData(cameraOutput);
   }
   else {
-    std::cout << "Invalid camera data format\n";
-    assert(false);
+    std::cout << "Invalid camera data format " << cameraOutput << "\n";
+    std::cout.flush();
+    //assert(false);
     return {};
   }
 }
 
 Pose calcTapePosition(CameraData data) {
-  double absAngle = data.yaw + Robot::getHeading();
+  /*double absAngle = data.yaw + Robot::getHeading();
 
   double x = data.distance * std::cos(absAngle * (2.0 * M_PI / 360.0));
   double y = data.distance * std::sin(absAngle * (2.0 * M_PI / 360.0));
@@ -82,7 +75,8 @@ Pose calcTapePosition(CameraData data) {
   // Snap tape angle to nearest multiple of 45 degrees
   double angle = calcAngle(absAngle);
 
-  return Pose{ x, y, angle };
+  return Pose{ x, y, angle };*/
+  return {};
 }
 
 Pose calcTargetPosition(Pose tapePosition) {
@@ -109,9 +103,9 @@ TapeRoughApproach::Path TapeRoughApproach::getPath(Pose target) {
 TapeRoughApproach::TapeRoughApproach(const std::string& data) {
   Path path = getPath(calcTargetPosition(calcTapePosition(parseCameraOutput(data))));
 
-  std::cout << "path:\n" << path.angle1 << "\n" << path.distance << "\n" << path.angle2 << "\n";
+  //std::cout << "path:\n" << path.angle1 << "\n" << path.distance << "\n" << path.angle2 << "\n";
 
   AddSequential(new TurnToAngle(path.angle1));
-  AddSequential(new DriveDistance(250.0 * path.distance));
+  AddSequential(new DriveDistance(path.distance));
   AddSequential(new TurnToAngle(path.angle2));
 }

@@ -152,6 +152,31 @@ static int signum(const T& value) {
 	return (value > 0) - (value < 0);
 }
 
+bool Arm::setpointReached() {
+    double currentWrist = m_wristPID.GetSetpoint();
+    double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
+    if (currentWrist != targetWrist) {
+        return false;
+    }
+    
+    if (std::abs(m_wristPID.GetError()) > 0.1) {
+        return false;
+    }
+
+    double currentArm = m_basePID.GetSetpoint();
+    double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+
+    if (currentArm != targetArm) {
+        return false;
+    }
+
+    if (std::abs(m_basePID.GetError()) > 0.1) {
+        return false;
+    }
+
+    return true;
+}
+
 void Arm::setMode(bool calibration) {
     m_calibration = calibration;
 }

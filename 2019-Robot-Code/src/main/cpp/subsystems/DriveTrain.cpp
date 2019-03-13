@@ -38,12 +38,21 @@ void DriveTrain::setRightSidePhase(bool phase) {
 	}
 }
 
+int DriveTrain::getEncoderPosition(bool right, int index) {
+	if (right) {
+		return m_rMotors[index]->GetSelectedSensorPosition();
+	}
+	else {
+		return m_lMotors[index]->GetSelectedSensorPosition();
+	}
+}
+
 std::pair< std::array< int, 3 >, std::array< int, 3 > > DriveTrain::getEncoderPositions() {
 	std::array< int, 3 > lPositions;
 	std::array< int, 3 > rPositions;
 	for (int i = 0; i < 3; ++i) {
-		lPositions[i] = m_lMotors[i]->GetSelectedSensorPosition();
-		rPositions[i] = m_rMotors[i]->GetSelectedSensorPosition();
+		lPositions[i] = getEncoderPosition(false, i);
+		rPositions[i] = getEncoderPosition(true, i);
 	}
 	return { lPositions, rPositions };
 }
