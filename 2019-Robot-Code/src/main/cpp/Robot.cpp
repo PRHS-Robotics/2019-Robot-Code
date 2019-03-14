@@ -107,7 +107,7 @@ void Robot::RobotInit() {
   std::cout << "Hello, world\n";
 
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
-  m_input = std::make_unique< Input >(0, 1);
+  m_input = std::make_unique< Input >(0, 1, 2);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);

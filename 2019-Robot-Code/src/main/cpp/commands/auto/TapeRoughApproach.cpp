@@ -109,3 +109,6 @@ TapeRoughApproach::TapeRoughApproach(const std::string& data) {
   AddSequential(new DriveDistance(path.distance));
   AddSequential(new TurnToAngle(path.angle2));
 }
+TapeRoughApproach::TapeRoughApproach(double dist, double yaw) {
+  
+}
