@@ -112,7 +112,7 @@ void Robot::RobotInit() {
   std::cout << "Hello, world\n";
 
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
-  m_input = std::make_unique< Input >(0, 1, 2);
+  m_input = std::make_unique< Input >(0, 1);
 
   m_cameraSwitch = std::make_unique< frc::DigitalOutput >(2);
 

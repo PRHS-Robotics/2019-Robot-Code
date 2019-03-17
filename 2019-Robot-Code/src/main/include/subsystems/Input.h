@@ -39,7 +39,7 @@ double applyDeadzone(double value, double deadzoneRange);
 class Input {
 public:
 
-	Input(int primaryPort, int secondaryPort, int tertiaryPort);
+	Input(int primaryPort, int secondaryPort);
 
 	InputState getRawInput();
 
@@ -53,7 +53,6 @@ private:
 
 	frc::Joystick primary;
 	frc::XboxController secondary;
-	frc::Joystick tertiary;
 
 	constexpr const static double deadzone = 0.15;
 };
