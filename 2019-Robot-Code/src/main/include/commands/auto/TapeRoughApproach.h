@@ -24,8 +24,8 @@ CameraData parseCameraOutput(const std::string& cameraOutput);
 
 class TapeRoughApproach : public frc::CommandGroup {
 public:
-  TapeRoughApproach(double distance, double yaw);
-
+  TapeRoughApproach(double dist, double yaw);
+  TapeRoughApproach(const std::string& data);
 private:
   struct Path {
     double angle1;

@@ -90,9 +90,10 @@ double applyDeadzone(double value, double deadzoneRange) {
 	}
 }
 
-Input::Input(int primaryPort, int secondaryPort) :
+Input::Input(int primaryPort, int secondaryPort, int tertiaryPort) :
 	primary(primaryPort),
-	secondary(secondaryPort)
+	secondary(secondaryPort),
+	tertiary(tertiaryPort)
 {
 	// Ensure all button mappings are valid
 	for (const auto& button : defaultButtonMap) {

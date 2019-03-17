@@ -143,3 +143,6 @@ TapeRoughApproach::TapeRoughApproach(double distance, double yaw) {
   AddSequential(new DriveDistance(path.distance));
   AddSequential(new TurnToAngle(path.angle2));
 }
+TapeRoughApproach::TapeRoughApproach(double dist, double yaw) {
+  
+}
