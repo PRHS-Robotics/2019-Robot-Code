@@ -39,7 +39,9 @@ void TurnToAngle::Execute() {
 
   std::cout << "angle diff: " << angle_difference << "\n";
 
-  m_error += angle_difference;
+  m_error += angle_difference / 15.0;
+
+  std::cout << "error: " << m_error << "\n";
 
   frc::SmartDashboard::PutNumber("Angle Error", m_error);
   

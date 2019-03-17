@@ -33,7 +33,7 @@ void Manipulator::Periodic() {
     }
 
     double temp = m_cargoDir;
-    if (temp < 0.0) {
+    if (temp < 0.0 && Robot::m_arm->getLevel() != Level::CargoShip) {
         temp *= 0.7 * 0.75;
     }
     else if (temp > 0.0) {

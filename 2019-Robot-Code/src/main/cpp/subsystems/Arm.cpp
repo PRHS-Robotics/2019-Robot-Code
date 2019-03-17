@@ -14,13 +14,13 @@ std::array< double, LEVEL_COUNT > BASE_SENSOR_VALUES =  { 2.461, 2.771, /*2.713*
 std::array< double, LEVEL_COUNT > WRIST_SENSOR_VALUES = { 2.563, 3.029, /*2.665*/2.665, 3.061, 2.765, 3.146, 2.859, 3.176, 3.156, 2.669 };
 const double DIFFERENCE = 0.0;
 
-const double arm_lower_output_limit = /*-0.05*/-0.60;
-const double arm_upper_output_limit = /* 0.40*/ 0.80;
+const double arm_lower_output_limit = /*-0.05*/-0.70;
+const double arm_upper_output_limit = /* 0.40*/ 0.90;
 const double arm_max_change = 0.015;
 
-const double wrist_lower_output_limit = /*-0.20*/-0.40;
+const double wrist_lower_output_limit = /*-0.20*/-0.80;
 const double wrist_upper_output_limit = /* 0.15*/ 0.50;
-const double wrist_max_change = 0.010;
+const double wrist_max_change = 0.015;
 
 const double armMinValue = 2.4;
 const double armMaxValue = 4.2;
@@ -217,7 +217,10 @@ void Arm::Periodic() {
         m_wristRetract |= Robot::m_input->getInput().pov2 == 0;
 
         if (m_wristRetract) {
-            currentWrist -= 0.03;
+            currentWrist -= 0.025;
+            if (!m_stopSwitch.Get()) {
+                Robot::m_driveTrain->drive(0.0, 0.0);
+            }
         }
 
         double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, currentWrist));
@@ -229,11 +232,11 @@ void Arm::Periodic() {
         if (WRIST_SENSOR_VALUES[static_cast< int >(m_level)] <= WRIST_SENSOR_VALUES[9] && currentWrist != targetWrist) {
             targetArm = currentArm;
         }
-        if (std::abs(targetArm - currentArm) < arm_max_change) {
+        if (std::abs(targetArm - currentArm) < arm_max_change / (2.0 * (m_level == Level::HatchLevel1))) {
             currentArm = targetArm;
         }
         else {
-            currentArm += arm_max_change * signum(targetArm - currentArm);
+            currentArm += arm_max_change * signum(targetArm - currentArm) / (2.0 * (m_level == Level::HatchLevel1));
         }
 
         double armLimitedSetpoint = std::max(armMinValue, std::min(armMaxValue, currentArm));

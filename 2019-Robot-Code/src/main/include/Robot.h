@@ -22,6 +22,8 @@
 #include <frc/SerialPort.h>
 #include <frc/DigitalOutput.h>
 #include <frc/AnalogInput.h>
+#include <cameraserver/CameraServer.h>
+#include <cscore_oo.h>
 
 #include "commands/auto/ApproachCargo.h"
 #include "commands/auto/FollowPath.h"
@@ -68,6 +70,12 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser< int > m_driveTrainChooser;
   frc::SendableChooser< int > m_pneumaticChooser;
 
+  cs::UsbCamera m_jevois;
+  cs::UsbCamera m_drivecam1;
+  cs::UsbCamera m_drivecam2;
+
+  cs::VideoSource m_server;
+
   static std::unique_ptr< frc::Compressor > m_compressor;
 
   static std::unique_ptr< SnapAngle > m_snapAngle;
@@ -95,6 +103,7 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< frc::SerialPort > m_cameraSerial;
 
   static std::unique_ptr< frc::DigitalOutput > m_lights;
+  static std::unique_ptr< frc::DigitalOutput > m_cameraSwitch;
 
   static std::unique_ptr< frc::AnalogInput > m_ultrasonic;
   static std::unique_ptr< frc::AnalogInput > m_ultrasonic2;

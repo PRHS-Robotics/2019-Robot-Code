@@ -11,10 +11,10 @@
 #include "commands/auto/DriveDistance.h"
 
 HatchIntake::HatchIntake() {
-  AddSequential(new SetLevel(Level::HatchLevel1));
-  AddSequential(new DriveUntil(15.375));
-  AddSequential(new DriveDistance(-0.5));
+  //AddSequential(new SetLevel(Level::HatchLevel1));
+  //AddSequential(new DriveUntil(15.375));
   AddParallel(new SetLevel(Level::HatchLevel2));
+  AddSequential(new DriveDistance(-0.5));
 
   // Add Commands here:
   // e.g. AddSequential(new Command1());

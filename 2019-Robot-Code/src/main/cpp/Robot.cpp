@@ -12,6 +12,9 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/commands/Scheduler.h>
 #include <cameraserver/CameraServer.h>
+#include <hal/Power.h>
+
+#include <cscore_oo.h>
 
 std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
 std::unique_ptr< Input > Robot::m_input{};
@@ -54,6 +57,8 @@ std::unique_ptr< TapeRoughApproach > Robot::m_tapeRoughApproach{};
 std::unique_ptr< SnapAngle > Robot::m_snapAngle{};
 
 std::unique_ptr< HatchIntake > Robot::m_hatchIntake{};
+
+std::unique_ptr< frc::DigitalOutput > Robot::m_cameraSwitch{};
 
 // Converts an angle <0 or >=360 to be within the range [0, 360)
 double constrainAngle(double angle) {
@@ -109,6 +114,8 @@ void Robot::RobotInit() {
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
   m_input = std::make_unique< Input >(0, 1);
 
+  m_cameraSwitch = std::make_unique< frc::DigitalOutput >(2);
+
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
@@ -150,7 +157,7 @@ void Robot::RobotInit() {
 
   m_hatchIntake = std::make_unique< HatchIntake >();
 
-  m_tapeRoughApproach = std::make_unique< TapeRoughApproach >("Tape None");
+  m_tapeRoughApproach = std::make_unique< TapeRoughApproach >(0.0, 0.0);
 
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
@@ -181,14 +188,44 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Drive Distance", m_driveDistance.get());
   frc::SmartDashboard::PutData("Tape Rough Approach", m_tapeRoughApproach.get());
   frc::SmartDashboard::PutData("Hatch Intake", m_hatchIntake.get());
+  
+  frc::SmartDashboard::PutData("Camera Switch", m_cameraSwitch.get());
 
   m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
   m_input->getButton("ALIGN")->WhenPressed(m_snapAngle.get());
-  m_input->getButton("DEBUG_BUTTON")->WhenPressed(m_hatchIntake.get());
 
   m_driveTrain->SetDefaultCommand(m_manualControl.get());
 
-  frc::CameraServer::GetInstance()->StartAutomaticCapture(1).SetVideoMode(cs::VideoMode::PixelFormat::kYUYV, 320, 240, 30);
+  m_jevois = frc::CameraServer::GetInstance()->StartAutomaticCapture("Jevois", 0);
+  m_drivecam1 = frc::CameraServer::GetInstance()->StartAutomaticCapture("DriveCam1", 1);
+  m_drivecam2 = frc::CameraServer::GetInstance()->StartAutomaticCapture("DriveCam2", 2);
+
+  m_jevois.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+  m_drivecam1.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+  m_drivecam2.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+
+  std::cout << m_jevois.GetInfo().name << "\n";
+  std::cout << m_drivecam1.GetInfo().name << "\n";
+  std::cout << m_drivecam2.GetInfo().name << "\n";
+
+  if (m_drivecam1.GetInfo().name == "JeVois-A33 Video Camera") {
+    std::swap(m_jevois, m_drivecam1);
+  }
+  else if (m_drivecam2.GetInfo().name == "JeVois-A33 Video Camera") {
+    std::swap(m_jevois, m_drivecam2);
+  }
+
+  //m_jevois.SetVideoMode(cs::VideoMode::kYUYV, 320, 240, 30);
+
+  m_server = frc::CameraServer::GetInstance()->PutVideo("aaaa", 160, 120);
+
+  //frc::CameraServer::GetInstance()->GetServer("Jevois").
+
+  /*frc::CameraServer::GetInstance()->GetServer("Jevois").SetSource(m_jevois);
+  frc::CameraServer::GetInstance()->GetServer("DriveCam1").SetSource(m_drivecam1);
+  frc::CameraServer::GetInstance()->GetServer("DriveCam2").SetSource(m_drivecam2);
+  */
+  //.SetVideoMode(cs::VideoMode::PixelFormat::kYUYV, 320, 240, 30);
 }
 
 void Robot::DisabledInit() {
@@ -210,6 +247,9 @@ void Robot::DisabledPeriodic() {
  * LiveWindow and SmartDashboard integrated updating.
  */
 void Robot::RobotPeriodic() {
+  //std::uint32_t status;
+  //HAL_GetUserVoltage5V(&status);
+
   auto armSensors = m_arm->getSensorValues();
 
   frc::SmartDashboard::PutNumber("Arm Base Analog", armSensors.first);
@@ -224,13 +264,13 @@ void Robot::RobotPeriodic() {
 
   auto positions = m_driveTrain->getEncoderPositions();
 
-  for (int i : positions.first) {
+  /*for (int i : positions.first) {
     std::cout << i << ", ";
   }
   for (int i : positions.second) {
     std::cout << i << ", ";
   }
-  std::cout << "\n";
+  std::cout << "\n";*/
 
   frc::SmartDashboard::PutNumber("Encoder Position", m_driveTrain->getEncoderPosition(false, 0));
 }
@@ -255,8 +295,6 @@ void Robot::matchInit() {
   m_arm->reloadValues();
 
   m_lights->UpdateDutyCycle(1.0);
-
-  m_gyro->SetYaw(90.0, 10.0);
 
   std::cout << "Starting teleop\n";
   if (m_testModeChooser.GetSelected()) {
@@ -302,13 +340,27 @@ void Robot::matchInit() {
   if (m_cameraSerial) {
     // setcam autoexp 1\nsetcam absexp 10\n
     std::cout << "Writing\n";
-    const char buf[] = "setcam autowb 0\nsetcam autogain 0\nsetcam gain 16\nsetcam redbal 110\nsetcam bluebal 170\nsetcam autoexp 1\nsetcam absexp 15\nsetpar serout All\n";
+    const char buf[] = "setlower 65 150 30\nsetupper 105 255 255\nsetcam autowb 0\nsetcam autogain 0\nsetcam gain 16\nsetcam redbal 110\nsetcam bluebal 130\nsetcam autoexp 1\nsetcam absexp 15\nsetpar serout All\n";
     m_cameraSerial->Write(buf, sizeof(buf));
   }
 }
 
 void Robot::matchPeriodic() {
-  //*m_snapAngle = SnapAngle{};
+  if (!m_snapAngle->IsRunning()) {
+    *m_snapAngle = SnapAngle{};
+  }
+
+  if (m_arm->getLevel() == Level::HatchLevel1 && buttonValue(m_input->getInput(), "DEBUG_BUTTON") && !m_hatchIntake->IsRunning()) {
+    m_hatchIntake->Start();
+  }
+
+
+  if (buttonValue(m_input->getInput(), "TRIGGER")) {
+    //m_server.SetSource(m_drivecam1);
+  }
+  else {
+    //m_server.SetSource(m_drivecam2);
+  }
 
   if (m_cameraSerial) {
     int bytes = m_cameraSerial->GetBytesReceived();
@@ -336,9 +388,11 @@ void Robot::matchPeriodic() {
         frc::SmartDashboard::PutNumber("Tape Y", data.y);
 
         double distance = 0.0469096 * data.y * data.y - 18.0531 * data.y + 1762.49;
-        double yaw = (data.x - 159.5) / 320.0 * 65.0;
+        double yaw = (159.5 - data.x) / 320.0 * 65.0;
 
-        *m_tapeRoughApproach = TapeRoughApproach(distance, yaw);
+        if (!m_tapeRoughApproach->IsRunning()) {
+          *m_tapeRoughApproach = TapeRoughApproach(distance, yaw);
+        }
 
         frc::SmartDashboard::PutNumber("Tape Distance", distance);
         frc::SmartDashboard::PutNumber("Tape Yaw", yaw);
@@ -350,6 +404,8 @@ void Robot::matchPeriodic() {
 }
 
 void Robot::AutonomousInit() {
+  m_gyro->SetYaw(90.0, 10.0);
+  
   matchInit();
 }
 

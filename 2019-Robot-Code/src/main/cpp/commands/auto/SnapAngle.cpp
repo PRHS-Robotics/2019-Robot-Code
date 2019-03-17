@@ -1,5 +1,6 @@
 #include "commands/auto/SnapAngle.h"
 #include "Robot.h"
+#include <iostream>
 
 #include <array>
 #include <algorithm>
@@ -17,5 +18,7 @@ double calcAngle(double angle) {
 SnapAngle::SnapAngle() :
     TurnToAngle(calcAngle(Robot::getHeading()))
 {
-    
+    /*std::cout << "=================\n";
+    std::cout << "Target Angle: " << calcAngle(Robot::getHeading()) << "\n";
+    std::cout << "=================\n";*/
 }

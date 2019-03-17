@@ -182,9 +182,10 @@ void DriveTrain::resetSensors() {
 	}
 }
 
-const double turnSensitivity = 0.5;
+const double turnSensitivity = 0.7;
 
 void DriveTrain::drive(InputState state) {
+	state.r = std::pow(state.r, 1.0);
 	double lSpeed = -state.y + state.r * turnSensitivity;
 	double rSpeed = -state.y - state.r * turnSensitivity;
 	lSpeed = std::max(std::min(lSpeed, 1.0), -1.0);

@@ -8,6 +8,7 @@
 #include "commands/auto/TapeRoughApproach.h"
 #include "commands/auto/TurnToAngle.h"
 #include "commands/auto/DriveDistance.h"
+#include "commands/auto/SnapAngle.h"
 #include "Robot.h"
 
 #include <iostream>
@@ -100,10 +101,43 @@ TapeRoughApproach::Path TapeRoughApproach::getPath(Pose target) {
   return path;
 }
 
-TapeRoughApproach::TapeRoughApproach(const std::string& data) {
-  Path path = getPath(calcTargetPosition(calcTapePosition(parseCameraOutput(data))));
+TapeRoughApproach::TapeRoughApproach(double distance, double yaw) {
+  Path path = { 0.0, 0.0, 0.0 }; //getPath(calcTargetPosition(calcTapePosition(parseCameraOutput(data))));
 
-  //std::cout << "path:\n" << path.angle1 << "\n" << path.distance << "\n" << path.angle2 << "\n";
+  //yaw -= 5;
+
+  double angle = yaw + Robot::getHeading();
+
+  double x = distance * std::cos(angle * 2 * M_PI / 360.0);
+  double y = distance * std::sin(angle * 2 * M_PI / 360.0);
+
+  x += 8.75 * std::cos((Robot::getHeading() - 90.0) * 2 * M_PI / 360.0);
+  y += 8.75 * std::sin((Robot::getHeading() - 90.0) * 2 * M_PI / 360.0);
+
+  path.angle2 = calcAngle(angle);
+
+  std::array< double, LEVEL_COUNT > armLengths;
+  armLengths[Level::CargoLevel1] = 32.0;
+  armLengths[Level::CargoLevel2] = 34.0;
+  armLengths[Level::CargoLevel3] = 18.0;
+  armLengths[Level::HatchLevel1] = 17.0;
+  armLengths[Level::HatchLevel2] = 26.0;
+  armLengths[Level::HatchLevel3] = 17.0;
+  armLengths[Level::CargoShip] = 33.0;
+
+  double armLength = std::max(armLengths[Robot::m_arm->getLevel()] + 6.0, 12.0);
+
+  x -= armLength * std::cos(path.angle2 * 2 * M_PI / 360.0);
+  y -= armLength * std::sin(path.angle2 * 2 * M_PI / 360.0);
+
+  distance = std::sqrt(x * x + y * y);
+
+  // 9.0, 12.0
+
+  path.angle1 = atan2(y, x) * 360.0 / (2.0 * M_PI);
+  path.distance = distance / 39.6;
+
+  std::cout << "path:\n" << path.angle1 << "\n" << path.distance << "\n" << path.angle2 << "\n";
 
   AddSequential(new TurnToAngle(path.angle1));
   AddSequential(new DriveDistance(path.distance));
