@@ -5,45 +5,37 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-#include "commands/Elevator.h"
+#include "commands/ManualClimb.h"
 #include "Robot.h"
-#include <iostream>
-#include "subsystems/ElevatorDriveTrain.h"
-#include "subsystems/DriveTrain.h"
-Elevator::Elevator(Input *input) :
+
+ManualClimb::ManualClimb(Input *input) :
   m_input(input),
-  // Use Requires() here to declare subsystem dependencies
-  // eg. Requires(Robot::chassis.get());
-  Command("Elevator", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
-{
+  frc::Command("Climb", *Robot::m_elevatorDriveTrain) {
 
 }
 
 // Called just before this Command runs the first time
-void Elevator::Initialize() {
-  
+void ManualClimb::Initialize() {
+
 }
 
 // Called repeatedly when this Command is scheduled to run
-void Elevator::Execute() {
-  //frc::Talon el_motorup{0};
-  //el_motorup.Set(0.1);
-  //el_motorup.Check();
-  Robot::m_elevatordrivetrain->drive();
+void ManualClimb::Execute() {
+  Robot::m_elevatorDriveTrain->extend(m_input->getInput().ry);
+  Robot::m_elevatorDriveTrain->drive(m_input->getInput().y);
 }
 
 // Make this return true when this Command no longer needs to run execute()
-bool Elevator::IsFinished() { 
-  return false; }
+bool ManualClimb::IsFinished() {
+  return false;
+}
 
 // Called once after isFinished returns true
-void Elevator::End() {
-
+void ManualClimb::End() {
 }
 
 // Called when another command which requires one or more of the same
 // subsystems is scheduled to run
-void Elevator::Interrupted() {
-  std::cout << "END";
-  End();
+void ManualClimb::Interrupted() {
+
 }

@@ -9,14 +9,16 @@
 
 #include <frc/commands/Command.h>
 #include "subsystems/Input.h"
-class Elevator : public frc::Command {
- public:
-  Elevator(Input *input);
+
+class ManualClimb : public frc::Command {
+public:
+  ManualClimb(Input *input);
   void Initialize() override;
   void Execute() override;
   bool IsFinished() override;
   void End() override;
-  void Interrupted() override; 
- private:
- Input *m_input;
+  void Interrupted() override;
+
+private:
+  Input *m_input;
 };

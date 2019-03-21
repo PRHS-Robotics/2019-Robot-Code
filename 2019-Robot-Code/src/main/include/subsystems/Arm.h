@@ -38,12 +38,27 @@ public:
 
     bool setpointReached();
 
+    double getTargetWrist();
+
 private:
+    Level m_prevLevel = Level::Home;
+
     Level m_level = Level::Home;
+
+    Level m_finalLevel = Level::Home;
+
+    enum State { ArmLevelMove, WristMove, ArmHomeMove };
+
+    State m_state = State::ArmHomeMove;
 
     bool m_calibration = false;
 
     bool m_wristRetract = false;
+
+    double updateWrist();
+    double updateArm();
+
+    bool doHalfSpeed();
 
     double m_armSetpoint = 0.0, m_wristSetpoint = 0.0;
     

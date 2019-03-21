@@ -8,17 +8,30 @@
 #define SRC_SUBSYSTEMS_ELEVATORDRIVETRAIN_H_
 
 #include "subsystems/Input.h"
+#include <frc/AnalogInput.h>
 #include "rev/SparkMax.h"
+#include "subsystems/ElevatorDriveTrain.h"
 #include <frc/commands/Subsystem.h>
 
 class ElevatorDriveTrain : public frc::Subsystem {
 public:
-  ElevatorDriveTrain(int extender, int driveMotor);
+  ElevatorDriveTrain(int extender, int driveMotor, int extendSolenoid, int retractSolenoid, int heightSensor);
 
-  void drive();
+  void drive(double speed);
+
+  void extend(double speed);
+
+  void setSolenoid(bool state);
+
+  double getHeight();
 
 private:
   rev::SparkMax m_extender;
   rev::SparkMax m_driveMotor;
+
+  frc::Solenoid m_extendSolenoid;
+  frc::Solenoid m_retractSolenoid;
+
+  frc::AnalogInput m_heightSensor;
 };
 #endif /*SRC_SUBSYSTEMS_ELEVATORDRIVETRAIN_H_*/

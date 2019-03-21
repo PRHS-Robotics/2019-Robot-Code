@@ -4,7 +4,7 @@
 
 #include "frc/commands/Command.h"
 
-enum Level{ Home, CargoFloorIntake, HatchLevel1, CargoLevel1, HatchLevel2, CargoLevel2, HatchLevel3, CargoLevel3, CargoShip, CargoHome, HatchFloorIntake, LEVEL_COUNT };
+enum Level{ Home, CargoHome, HatchFloorIntake, CargoFloorIntake, HatchLevel1, CargoLevel1, HatchLevel2, CargoLevel2, HatchLevel3, CargoLevel3, CargoShip, LEVEL_COUNT };
 
 class ManualArm : public frc::Command {
 public:

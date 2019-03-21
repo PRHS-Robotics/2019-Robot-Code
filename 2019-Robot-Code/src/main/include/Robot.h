@@ -38,7 +38,7 @@
 #include "commands/SpeedTest.h"
 #include "commands/ManualArm.h"
 #include "commands/ManualManip.h"
-#include "commands/Elevator.h"
+#include "commands/ManualClimb.h"
 #include "commands/CalibrateArm.h"
 
 class Robot : public frc::TimedRobot {
@@ -81,7 +81,7 @@ class Robot : public frc::TimedRobot {
   static std::unique_ptr< SnapAngle > m_snapAngle;
 
   static std::unique_ptr< DriveTrain > m_driveTrain;
-  static std::unique_ptr< ElevatorDriveTrain > m_elevatordrivetrain;
+  static std::unique_ptr< ElevatorDriveTrain > m_elevatorDriveTrain;
   static std::unique_ptr< Input > m_input;
 
 	static std::unique_ptr< ManualControl > m_manualControl;
@@ -91,7 +91,7 @@ class Robot : public frc::TimedRobot {
 
   static std::unique_ptr< Arm > m_arm;
   static std::unique_ptr< Manipulator > m_manipulator;
-  static std::unique_ptr< Elevator > m_elevator;
+  static std::unique_ptr< ManualClimb > m_manualClimb;
 
   static std::unique_ptr< ManualArm > m_manualArm;
   static std::unique_ptr< ManualManip > m_manualManip;

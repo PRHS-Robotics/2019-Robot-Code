@@ -8,25 +8,32 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <fstream>
 
+template < typename T >
+static int signum(const T& value) {
+	return (value > 0) - (value < 0);
+}
+
 /*const double BASE_SENSOR_VALUES[LEVEL_COUNT] = { 2.8, 2.933, 3.375, 3.817, 4.310, 2.974, 3.441, 3.947 };
 const double WRIST_SENSOR_VALUES[LEVEL_COUNT] = { 3.93, 3.508, 3.443, 3.473, 3.309, 3.872, 3.4787, 3.680 };*/
 std::array< double, LEVEL_COUNT > BASE_SENSOR_VALUES =  { 2.461, 2.771, /*2.713*/2.733, 3.071, 3.217, 3.518, 3.697, 3.968, 3.327, 2.461 };
 std::array< double, LEVEL_COUNT > WRIST_SENSOR_VALUES = { 2.563, 3.029, /*2.665*/2.665, 3.061, 2.765, 3.146, 2.859, 3.176, 3.156, 2.669 };
 const double DIFFERENCE = 0.0;
 
-const double arm_lower_output_limit = /*-0.05*/-0.70;
-const double arm_upper_output_limit = /* 0.40*/ 0.90;
-const double arm_max_change = 0.015;
+const double arm_lower_output_limit = /*-0.05*/-1.00;
+const double arm_upper_output_limit = /* 0.40*/ 1.00;
+const double arm_max_change = /*0.015*/0.015;
 
-const double wrist_lower_output_limit = /*-0.20*/-0.80;
-const double wrist_upper_output_limit = /* 0.15*/ 0.50;
-const double wrist_max_change = 0.015;
+const double wrist_lower_output_limit = /*-0.20*/-1.00;
+const double wrist_upper_output_limit = /* 0.15*/ 1.00;
+const double wrist_max_change = /*0.015*/0.010;
 
 const double armMinValue = 2.4;
 const double armMaxValue = 4.2;
 
 const double wristMinValue = 2.53;
 const double wristMaxValue = 3.2;
+
+std::array< const char*, LEVEL_COUNT > ENUM_NAMES = { "Home", "CargoHome", "HatchFloorIntake", "CargoFloorIntake", "HatchLevel1", "CargoLevel1", "HatchLevel2", "CargoLevel2", "HatchLevel3", "CargoLevel3", "CargoShip" };
 
 static const double calculateArmFGain(double setpoint) {
     static const double arm_center_voltage = /*TODO*/3.209;
@@ -123,21 +130,78 @@ void Arm::setEnabled(bool enabled) {
     }
 }
 
+/*template< typename T >
+static int signum(const T& value) {
+    return (value > T{0}) - (value < T{0});
+}*/
+
+bool isCargoLevel(Level level) {
+    return level == Level::CargoLevel1 || level == Level::CargoLevel2 || level == Level::CargoLevel3 || level == Level::CargoShip;
+}
+
+bool isHatchLevel(Level level) {
+    return level == Level::HatchLevel1 || level == Level::HatchLevel2 || level == Level::HatchLevel3;
+}
+
 void Arm::setLevel(Level level) {
     m_calibration = false;
     m_wristRetract = false;
+
+    if (m_finalLevel == level) {
+        return;
+    }
 
     if (level < Level::Home || level >= Level::LEVEL_COUNT) {
         return;
     }
 
-    m_level = level;
+    // Prevent using hatch panels if it is certain that cargo is being picked up (doesn't always work, though)
+    if (!m_stopSwitch.Get() && level == Level::HatchLevel1 && level == Level::HatchLevel2 && level == Level::HatchLevel3) {
+        return;
+    }
+
+    if (isCargoLevel(level) && isHatchLevel(m_finalLevel)) {
+        return;
+    }
+
+    if (isHatchLevel(level) && isCargoLevel(m_finalLevel)) {
+        return;
+    }
+
+    /* ============== DO NOT CHANGE: ARM RESTRICTION ===================================================================================================== */
+    m_prevLevel = m_finalLevel;
+
+    if (signum(int(m_finalLevel) - int(Level::CargoFloorIntake)) != signum(int(level) - int(Level::CargoFloorIntake))) {
+        std::cout << "special maneuver\n";
+        m_level = Level::CargoFloorIntake;
+    }
+    else {
+        std::cout << "noooooooooooooooooooooooo\n";
+        m_level = level;
+    }
+    /* ==================================================================================================================== */
+
+    m_finalLevel = level;
+    
+    bool movingDown = m_prevLevel > Level::CargoFloorIntake && m_finalLevel <= Level::CargoFloorIntake;
+    bool movingUp = m_prevLevel <= Level::CargoFloorIntake && m_finalLevel > Level::CargoFloorIntake;
+
+    if (movingDown) {
+        m_state = State::ArmLevelMove;
+    }
+    else if (movingUp) {
+        m_state = State::ArmHomeMove;
+    }
+
+    std::cout << "final: " << ENUM_NAMES[int(m_finalLevel)] << "\n";
+    std::cout << "level: " << ENUM_NAMES[int(m_level)] << "\n";
+    std::cout << "prev: " << ENUM_NAMES[int(m_prevLevel)] << "\n";
 
     setMode(false);
 }
 
 Level Arm::getLevel() {
-    return m_level;
+    return m_finalLevel;
 }
 
 std::pair< double, double > Arm::getSensorValues() {
@@ -147,14 +211,9 @@ std::pair< double, double > Arm::getSensorValues() {
     };
 }
 
-template < typename T >
-static int signum(const T& value) {
-	return (value > 0) - (value < 0);
-}
-
 bool Arm::setpointReached() {
     double currentWrist = m_wristPID.GetSetpoint();
-    double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
+    double targetWrist = getTargetWrist();
     if (currentWrist != targetWrist) {
         return false;
     }
@@ -185,8 +244,54 @@ double Arm::getArmSetpoint() const {
     return m_armSetpoint;
 }
 
+double Arm::getTargetWrist() {
+    double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
+
+    if (m_level == Level::CargoLevel1 || m_level == Level::CargoLevel2 || m_level == Level::CargoLevel3 || m_level == Level::CargoShip) {
+        targetWrist = wristMaxValue;
+    }
+
+    return targetWrist;
+}
+
 double Arm::getWristSetpoint() const {
     return m_wristSetpoint;
+}
+
+double Arm::updateWrist() {
+    double currentWrist = m_wristPID.GetSetpoint();
+    double targetWrist = getTargetWrist();
+    
+    if (std::abs(targetWrist - currentWrist) < wrist_max_change) {
+        currentWrist = targetWrist;
+    }
+    else {
+        currentWrist += wrist_max_change * signum(targetWrist - currentWrist);
+    }
+    return currentWrist;
+}
+
+bool Arm::doHalfSpeed() {
+    double currentArm = m_basePID.GetSetpoint();
+    double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+    bool halfSpeed = (m_level == Level::HatchLevel1);
+    if (m_level == Level::CargoHome || m_level == Level::Home) {
+        double level1 = BASE_SENSOR_VALUES[static_cast< int >(Level::CargoLevel1)];
+        halfSpeed |= std::min(targetArm, level1) <= currentArm && currentArm <= std::max(targetArm, level1);
+    }
+    return halfSpeed;
+}
+
+double Arm::updateArm() {
+    double currentArm = m_basePID.GetSetpoint();
+    double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+    if (std::abs(targetArm - currentArm) < (arm_max_change / (1.0 + doHalfSpeed()))) {
+        currentArm = targetArm;
+    }
+    else {
+        currentArm += arm_max_change * signum(targetArm - currentArm);
+    }
+    return currentArm;
 }
 
 void Arm::Periodic() {
@@ -205,13 +310,99 @@ void Arm::Periodic() {
         double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, m_wristSetpoint));
         m_wristPID.SetSetpoint(wristLimitedSetpoint);
     } else {
+        bool movingDown = m_prevLevel > Level::CargoFloorIntake && m_finalLevel <= Level::CargoFloorIntake;
+        bool movingUp = m_prevLevel <= Level::CargoFloorIntake && m_finalLevel > Level::CargoFloorIntake;
         double currentWrist = m_wristPID.GetSetpoint();
-        double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
-        if (std::abs(targetWrist - currentWrist) < wrist_max_change) {
-            currentWrist = targetWrist;
+        double targetWrist = getTargetWrist();
+        double currentArm = m_basePID.GetSetpoint();
+        double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+
+        if (movingUp) {
+            std::cout << "state: " << int(m_state) << "\n";
+            if (isCargoLevel(m_finalLevel)) {
+                switch (m_state) {
+                case State::ArmHomeMove:
+                    currentArm = updateArm();
+                    if (currentArm == targetArm) {
+                        m_state = State::WristMove;
+                        m_level = m_finalLevel;
+                    }
+                    break;
+                case State::WristMove:
+                    currentWrist = updateWrist();
+                    if (currentWrist == targetWrist) {
+                        m_state = State::ArmLevelMove;
+                    }
+                    break;
+                case State::ArmLevelMove:
+                    currentArm = updateArm();
+                    break;
+                }
+            }
+            else {
+                m_level = m_finalLevel;
+                switch (m_state) {
+                    case State::ArmHomeMove:
+                    case State::ArmLevelMove:
+                    currentArm = updateArm();
+                    if (currentArm == targetArm) {
+                        m_state = State::WristMove;
+                    }
+                    break;
+                    case State::WristMove:
+                    currentWrist = updateWrist();
+                    break;
+                }
+            }
+        }
+        else if (movingDown) {
+            if (isCargoLevel(m_finalLevel) || isCargoLevel(m_prevLevel)) {
+                switch (m_state) {
+                case State::ArmLevelMove:
+                    currentArm = updateArm();
+                    if (currentArm == targetArm) {
+                        m_state = State::WristMove;
+                        m_level = m_finalLevel;
+                    }
+                    break;
+                case State::WristMove:
+                    currentWrist = updateWrist();
+                    if (currentWrist == targetWrist) {
+                        m_state = State::ArmHomeMove;
+                    }
+                    break;
+                case State::ArmHomeMove:
+                    currentArm = updateArm();
+                    break;
+                }
+            }
+            else {
+                m_level = Level::Home;
+                switch (m_state) {
+                case State::ArmLevelMove:
+                    m_state = State::WristMove;
+                case State::WristMove:
+                    currentWrist = updateWrist();
+                    if (currentWrist == targetWrist) {
+                        m_state = State::ArmHomeMove;
+                    }
+                    break;
+                case State::ArmHomeMove:
+                    currentArm = updateArm();
+                    break;
+                }
+            }
         }
         else {
-            currentWrist += wrist_max_change * signum(targetWrist - currentWrist);
+            m_level = m_finalLevel;
+            if (m_finalLevel == Level::Home || m_finalLevel == Level::CargoHome) {
+                m_state = State::WristMove;
+                m_prevLevel = static_cast< Level >(Level::CargoFloorIntake + 1);
+            }
+            else {
+                currentArm = updateArm();
+                currentWrist = updateWrist();
+            }
         }
 
         m_wristRetract |= Robot::m_input->getInput().pov2 == 0;
@@ -226,22 +417,10 @@ void Arm::Periodic() {
         double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, currentWrist));
         m_wristPID.SetSetpoint(wristLimitedSetpoint);
 
-        // Allows for gradual change of arm and wrist target position
-        double currentArm = m_basePID.GetSetpoint();
-        double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
-        if (WRIST_SENSOR_VALUES[static_cast< int >(m_level)] <= WRIST_SENSOR_VALUES[9] && currentWrist != targetWrist) {
-            targetArm = currentArm;
-        }
-        if (std::abs(targetArm - currentArm) < arm_max_change / (2.0 * (m_level == Level::HatchLevel1))) {
-            currentArm = targetArm;
-        }
-        else {
-            currentArm += arm_max_change * signum(targetArm - currentArm) / (2.0 * (m_level == Level::HatchLevel1));
-        }
-
         double armLimitedSetpoint = std::max(armMinValue, std::min(armMaxValue, currentArm));
         m_basePID.SetSetpoint(armLimitedSetpoint);
         m_basePID.SetF(calculateArmFGain(armLimitedSetpoint));
+
         frc::SmartDashboard::PutNumber("Arm Feedforward", calculateArmFGain(currentArm));
         frc::SmartDashboard::PutNumber("Arm Base Goal", targetArm);
     }

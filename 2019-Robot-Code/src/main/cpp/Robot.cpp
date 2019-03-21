@@ -13,6 +13,7 @@
 #include <frc/commands/Scheduler.h>
 #include <cameraserver/CameraServer.h>
 #include <hal/Power.h>
+#include <opencv/cv.h>
 
 #include <cscore_oo.h>
 
@@ -24,12 +25,13 @@ std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
-std::unique_ptr< Elevator > Robot::m_elevator{};
-std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatordrivetrain{};
+std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatorDriveTrain{};
 std::unique_ptr< Manipulator > Robot::m_manipulator{};
 std::unique_ptr< Arm > Robot::m_arm{};
 
 std::unique_ptr< DriveUntil > Robot::m_driveUntil{};
+
+std::unique_ptr< ManualClimb > Robot::m_manualClimb{};
 
 std::unique_ptr< ManualManip > Robot::m_manualManip{};
 
@@ -122,10 +124,14 @@ void Robot::RobotInit() {
 
   m_arm = std::make_unique< Arm >(1, 0, 2, 1, 1);
 
+  //m_elevatorDriveTrain = std::make_unique< ElevatorDriveTrain >()
+
   m_lights = std::make_unique< frc::DigitalOutput >(9);
   m_lights->EnablePWM(0.0);
 
   m_manualArm = std::make_unique< ManualArm >(Robot::m_input.get());
+
+  //m_manualClimb = std::make_unique< ManualClimb >(Robot::m_input.get());
 
   m_manipulator = std::make_unique< Manipulator >(3, 0, 1, 0);
 
@@ -188,6 +194,7 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Drive Distance", m_driveDistance.get());
   frc::SmartDashboard::PutData("Tape Rough Approach", m_tapeRoughApproach.get());
   frc::SmartDashboard::PutData("Hatch Intake", m_hatchIntake.get());
+  //frc::SmartDashboard::PutData("Manual Climb", m_manualClimb.get());
   
   frc::SmartDashboard::PutData("Camera Switch", m_cameraSwitch.get());
 
@@ -362,7 +369,7 @@ void Robot::matchPeriodic() {
     //m_server.SetSource(m_drivecam2);
   }
 
-  if (m_cameraSerial) {
+  /*if (m_cameraSerial) {
     int bytes = m_cameraSerial->GetBytesReceived();
     frc::SmartDashboard::PutNumber("Serial Bytes", bytes);
     if (bytes != 0) {
@@ -398,7 +405,7 @@ void Robot::matchPeriodic() {
         frc::SmartDashboard::PutNumber("Tape Yaw", yaw);
       }
     }
-  }
+  }*/
 
   frc::Scheduler::GetInstance()->Run();
 }
