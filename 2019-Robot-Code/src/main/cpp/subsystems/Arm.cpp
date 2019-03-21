@@ -31,7 +31,7 @@ const double armMinValue = 2.4;
 const double armMaxValue = 4.2;
 
 const double wristMinValue = 2.53;
-const double wristMaxValue = 3.2;
+const double wristMaxValue = 3.3;
 
 std::array< const char*, LEVEL_COUNT > ENUM_NAMES = { "Home", "CargoHome", "HatchFloorIntake", "CargoFloorIntake", "HatchLevel1", "CargoLevel1", "HatchLevel2", "CargoLevel2", "HatchLevel3", "CargoLevel3", "CargoShip" };
 

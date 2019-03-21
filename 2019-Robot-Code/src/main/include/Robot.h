@@ -70,11 +70,11 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser< int > m_driveTrainChooser;
   frc::SendableChooser< int > m_pneumaticChooser;
 
-  cs::UsbCamera m_jevois;
+  /*cs::UsbCamera m_jevois;
   cs::UsbCamera m_drivecam1;
-  cs::UsbCamera m_drivecam2;
+  cs::UsbCamera m_drivecam2;*/
 
-  cs::VideoSource m_server;
+  //cs::VideoSource m_server;
 
   static std::unique_ptr< frc::Compressor > m_compressor;
 

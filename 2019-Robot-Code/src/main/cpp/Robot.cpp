@@ -13,7 +13,8 @@
 #include <frc/commands/Scheduler.h>
 #include <cameraserver/CameraServer.h>
 #include <hal/Power.h>
-#include <opencv/cv.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
 
 #include <cscore_oo.h>
 
@@ -110,6 +111,48 @@ double Robot::ultrasonicDistance(int sensor) {
   }
 }
 
+void visionThread() {
+  cs::UsbCamera m_cam0 = frc::CameraServer::GetInstance()->StartAutomaticCapture("Cam0", 0);
+  cs::UsbCamera m_cam1 = frc::CameraServer::GetInstance()->StartAutomaticCapture("Cam1", 1);
+  cs::UsbCamera m_cam2 = frc::CameraServer::GetInstance()->StartAutomaticCapture("Cam2", 2);
+
+  m_cam0.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+  m_cam1.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+  m_cam2.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+
+  std::cout << m_cam0.GetInfo().name << "\n";
+  std::cout << m_cam1.GetInfo().name << "\n";
+  std::cout << m_cam2.GetInfo().name << "\n";
+
+  if (m_cam0.GetInfo().name == "JeVois-A33 Video Camera") {
+    std::swap(m_cam0, m_cam2);
+  }
+  else if (m_cam1.GetInfo().name == "JeVois-A33 Video Camera") {
+    std::swap(m_cam1, m_cam2);
+  }
+
+  cs::CvSink sink0 = frc::CameraServer::GetInstance()->GetVideo(m_cam0);
+  cs::CvSink sink1 = frc::CameraServer::GetInstance()->GetVideo(m_cam1);
+  cs::CvSource stream0 = frc::CameraServer::GetInstance()->PutVideo("DriveCam0", 160, 120);
+  cs::CvSource stream1 = frc::CameraServer::GetInstance()->PutVideo("DriveCam1", 160, 120);
+
+  cv::Mat source0;
+  cv::Mat source1;
+  cv::Mat output0;
+  cv::Mat output1;
+
+  while (true) {
+    sink0.GrabFrame(source0);
+    sink1.GrabFrame(source1);
+
+    cvtColor(source0, output0, cv::COLOR_BGR2GRAY);
+    cvtColor(source1, output1, cv::COLOR_BGR2GRAY);
+
+    stream0.PutFrame(output0);
+    stream1.PutFrame(output1);
+  }
+}
+
 void Robot::RobotInit() {
   std::cout << "Hello, world\n";
 
@@ -203,28 +246,12 @@ void Robot::RobotInit() {
 
   m_driveTrain->SetDefaultCommand(m_manualControl.get());
 
-  m_jevois = frc::CameraServer::GetInstance()->StartAutomaticCapture("Jevois", 0);
-  m_drivecam1 = frc::CameraServer::GetInstance()->StartAutomaticCapture("DriveCam1", 1);
-  m_drivecam2 = frc::CameraServer::GetInstance()->StartAutomaticCapture("DriveCam2", 2);
-
-  m_jevois.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
-  m_drivecam1.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
-  m_drivecam2.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
-
-  std::cout << m_jevois.GetInfo().name << "\n";
-  std::cout << m_drivecam1.GetInfo().name << "\n";
-  std::cout << m_drivecam2.GetInfo().name << "\n";
-
-  if (m_drivecam1.GetInfo().name == "JeVois-A33 Video Camera") {
-    std::swap(m_jevois, m_drivecam1);
-  }
-  else if (m_drivecam2.GetInfo().name == "JeVois-A33 Video Camera") {
-    std::swap(m_jevois, m_drivecam2);
-  }
+  //std::thread vision(visionThread);
+  //vision.detach();
 
   //m_jevois.SetVideoMode(cs::VideoMode::kYUYV, 320, 240, 30);
 
-  m_server = frc::CameraServer::GetInstance()->PutVideo("aaaa", 160, 120);
+  //m_server = frc::CameraServer::GetInstance()->PutVideo("aaaa", 160, 120);
 
   //frc::CameraServer::GetInstance()->GetServer("Jevois").
 
