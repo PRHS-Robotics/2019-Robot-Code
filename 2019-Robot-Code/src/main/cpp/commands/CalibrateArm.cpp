@@ -8,6 +8,7 @@
 #include "commands/CalibrateArm.h"
 #include "commands/ManualArm.h"
 #include "Robot.h"
+#include <hal/Power.h>
 #include <fstream>
 #include <iostream>
 
@@ -100,11 +101,13 @@ void CalibrateArm::saveValues() {
 
   file << m_baseSensorValues.size() << '\n';
 
+  int32_t status;
+
   for (auto value : m_baseSensorValues) {
-    file << value << '\n';
+    file << value / HAL_GetUserVoltage5V(&status) << '\n';
   }
   for (auto value : m_wristSensorValues) {
-    file << value << '\n';
+    file << value / HAL_GetUserVoltage5V(&status) << '\n';
   }
 
   file.close();

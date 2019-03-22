@@ -41,6 +41,9 @@ public:
     double getTargetWrist();
 
 private:
+    void setBase(double setpoint);
+    void setWrist(double setpoint);
+
     Level m_prevLevel = Level::Home;
 
     Level m_level = Level::Home;

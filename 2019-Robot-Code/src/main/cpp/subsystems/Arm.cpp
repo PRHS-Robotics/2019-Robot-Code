@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <frc/commands/Scheduler.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <hal/Power.h>
 #include <fstream>
 
 template < typename T >
@@ -68,6 +69,16 @@ void Arm::reloadValues() {
     std::cout << "Done reading\n";
 }
 
+void Arm::setBase(double setpoint) {
+    int32_t status;
+    m_basePID.SetSetpoint(setpoint * HAL_GetUserVoltage5V(&status));
+}
+
+void Arm::setWrist(double setpoint) {
+    int32_t status;
+    m_wristPID.SetSetpoint(setpoint * HAL_GetUserVoltage5V(&status));
+}
+
 Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int stopSwitchPort) :
     m_baseSensor(baseSensor),
     m_wristSensor(wristSensor),
@@ -99,10 +110,12 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int sto
 
     m_basePID.SetF(calculateArmFGain(BASE_SENSOR_VALUES[0]));
 
-    m_basePID.SetSetpoint(BASE_SENSOR_VALUES[0]);
-    m_wristPID.SetSetpoint(WRIST_SENSOR_VALUES[0]);
-
     reloadValues();
+
+    //m_basePID.SetSetpoint(BASE_SENSOR_VALUES[0]);
+    //m_wristPID.SetSetpoint(WRIST_SENSOR_VALUES[0]);
+    setBase(BASE_SENSOR_VALUES[0]);
+    setWrist(WRIST_SENSOR_VALUES[0]);
 
     frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
@@ -205,9 +218,11 @@ Level Arm::getLevel() {
 }
 
 std::pair< double, double > Arm::getSensorValues() {
+    int32_t status;
+    
     return {
-        m_baseSensor.GetAverageVoltage(),
-        m_wristSensor.GetAverageVoltage()
+        m_baseSensor.GetAverageVoltage() / HAL_GetUserVoltage5V(&status),
+        m_wristSensor.GetAverageVoltage() / HAL_GetUserVoltage5V(&status)
     };
 }
 
@@ -415,10 +430,12 @@ void Arm::Periodic() {
         }
 
         double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, currentWrist));
-        m_wristPID.SetSetpoint(wristLimitedSetpoint);
+        //m_wristPID.SetSetpoint(wristLimitedSetpoint);
+        setWrist(wristLimitedSetpoint);
 
         double armLimitedSetpoint = std::max(armMinValue, std::min(armMaxValue, currentArm));
-        m_basePID.SetSetpoint(armLimitedSetpoint);
+        //m_basePID.SetSetpoint(armLimitedSetpoint);
+        setBase(armLimitedSetpoint);
         m_basePID.SetF(calculateArmFGain(armLimitedSetpoint));
 
         frc::SmartDashboard::PutNumber("Arm Feedforward", calculateArmFGain(currentArm));
