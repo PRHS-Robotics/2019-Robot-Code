@@ -30,7 +30,7 @@ const double wrist_max_change = /*0.015*/0.010;
 const double armMinValue = 2.4;
 const double armMaxValue = 4.2;
 
-const double wristMinValue = 2.53;
+const double wristMinValue = 2.3;
 const double wristMaxValue = 3.2;
 
 std::array< const char*, LEVEL_COUNT > ENUM_NAMES = { "Home", "CargoHome", "HatchFloorIntake", "CargoFloorIntake", "HatchLevel1", "CargoLevel1", "HatchLevel2", "CargoLevel2", "HatchLevel3", "CargoLevel3", "CargoShip" };
@@ -247,9 +247,9 @@ double Arm::getArmSetpoint() const {
 double Arm::getTargetWrist() {
     double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
 
-    if (m_level == Level::CargoLevel1 || m_level == Level::CargoLevel2 || m_level == Level::CargoLevel3 || m_level == Level::CargoShip) {
+    /*if (m_level == Level::CargoLevel1 || m_level == Level::CargoLevel2 || m_level == Level::CargoLevel3 || m_level == Level::CargoShip) {
         targetWrist = wristMaxValue;
-    }
+    }*/
 
     return targetWrist;
 }
