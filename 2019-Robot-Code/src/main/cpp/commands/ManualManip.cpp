@@ -21,9 +21,15 @@ void ManualManip::Execute() {
 
     Robot::m_manipulator->setCargoDir(m_input->getInput().ly * 1.0);
 
-    Robot::m_manipulator->setExtended(m_input->getInput().pov2 == 0);
+    bool extendState = Robot::m_manipulator->getExtended();
 
-    //Robot::m_manipulator->setExtended(buttonValue(m_input->getInput(), "OUTTAKE_PANEL"));
+    if (Robot::m_arm->stopSwitchPressed()) {
+        extendState = false;
+    }
+
+    extendState |= m_input->getInput().pov2 == 0;
+
+    Robot::m_manipulator->setExtended(extendState);
 }
 
 bool ManualManip::IsFinished() {

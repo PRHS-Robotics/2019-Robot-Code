@@ -14,6 +14,8 @@ public:
 
     void setExtended(bool extended);
 
+    bool getExtended() const;
+
     bool hasCargo() const;
 
     void Periodic() override;

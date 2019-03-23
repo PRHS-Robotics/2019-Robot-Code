@@ -21,6 +21,7 @@ void CalibrateArm::Initialize() {
   readValues();
   Robot::m_arm->setArmSetpoint(m_baseSensorValues[0]);
   Robot::m_arm->setWristSetpoint(m_wristSensorValues[0]);
+  Robot::m_arm->setMode(true);
   Robot::m_arm->setEnabled(true);
 }
 

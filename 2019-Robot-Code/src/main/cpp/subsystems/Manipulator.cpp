@@ -25,6 +25,10 @@ void Manipulator::setExtended(bool extended) {
     m_retractSolenoid.Set(!extended);
 }
 
+bool Manipulator::getExtended() const {
+    return m_extendSolenoid.Get();
+}
+
 void Manipulator::Periodic() {
     if (Robot::m_arm->getLevel() == Level::CargoHome || Robot::m_arm->getLevel() == Level::Home) {
         m_cargoMotor.Set(0.0);

@@ -12,6 +12,7 @@ ManualArm::ManualArm(Input *input) :
 
 void ManualArm::Initialize() {
     Robot::m_arm->setLevel(Level::Home);
+    Robot::m_arm->setMode(false);
 }
 
 Level getLevel(Input *input) {
@@ -44,7 +45,7 @@ Level getLevel(Input *input) {
 
     if (Robot::m_manipulator->hasCargo()) {
         if (Robot::m_arm->getLevel() == Level::CargoFloorIntake) {
-            return Level::CargoHome;
+            return Level::CargoShip;
         }
     }
     else if (buttonValue(input->getInput(), "ARM_CARGO_INTAKE")) {

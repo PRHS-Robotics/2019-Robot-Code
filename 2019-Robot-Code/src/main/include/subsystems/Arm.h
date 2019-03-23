@@ -36,9 +36,13 @@ public:
 
     void setEnabled(bool enabled);
 
+    bool stopSwitchPressed() const;
+
     bool setpointReached();
 
     double getTargetWrist();
+
+    double getTargetArm();
 
 private:
     Level m_prevLevel = Level::Home;
@@ -55,12 +59,15 @@ private:
 
     bool m_wristRetract = false;
 
+    double m_baseOffset = 0.0;
+    double m_wristOffset = 0.0;
+
+    bool m_debounce;
+
     double updateWrist();
     double updateArm();
 
     bool doHalfSpeed();
-
-    double m_armSetpoint = 0.0, m_wristSetpoint = 0.0;
     
     frc::AnalogInput   m_baseSensor;
     WPI_VictorSPX m_baseMotor;

@@ -30,14 +30,14 @@ const double wrist_max_change = /*0.015*/0.010;
 const double armMinValue = 2.4;
 const double armMaxValue = 4.2;
 
-const double wristMinValue = 2.53;
-const double wristMaxValue = 3.2;
+const double wristMinValue = 2.4;
+const double wristMaxValue = 3.07;
 
 std::array< const char*, LEVEL_COUNT > ENUM_NAMES = { "Home", "CargoHome", "HatchFloorIntake", "CargoFloorIntake", "HatchLevel1", "CargoLevel1", "HatchLevel2", "CargoLevel2", "HatchLevel3", "CargoLevel3", "CargoShip" };
 
 static const double calculateArmFGain(double setpoint) {
-    static const double arm_center_voltage = /*TODO*/3.209;
-    static const double factor = /*TODO*/0.145;
+    static const double arm_center_voltage = BASE_SENSOR_VALUES[static_cast< int >(Level::HatchLevel2)];
+    static const double factor = 0.145;
 
     double angle = (setpoint - arm_center_voltage) / 0.014666666 * (2.0 * M_PI / 360.0);
     return factor * std::cos(angle) / setpoint;
@@ -46,7 +46,11 @@ static const double calculateArmFGain(double setpoint) {
 void Arm::reloadValues() {
     std::ifstream file("/home/lvuser/arm_settings.txt");
 
-    assert(file.good());
+    if (!file.good()) {
+        setEnabled(false);
+        std::cout << "file is not good aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
+        return;
+    }
 
     int size;
     file >> size;
@@ -89,7 +93,7 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int sto
     m_wristMotor.EnableVoltageCompensation(true);
 
     m_baseMotor.SetInverted(false);
-    m_wristMotor.SetInverted(true); // SET TO FALSE ON COMP ROBOT
+    m_wristMotor.SetInverted(true);
 
     m_basePID.SetOutputRange(arm_lower_output_limit, arm_upper_output_limit);
     m_wristPID.SetOutputRange(wrist_lower_output_limit, wrist_upper_output_limit);
@@ -108,15 +112,12 @@ Arm::Arm(int baseMotor, int baseSensor, int wristMotor, int wristSensor, int sto
 }
 
 void Arm::setArmSetpoint(double setpoint) {
-    m_calibration = true;
-
-    m_armSetpoint = std::max(armMinValue, std::min(armMaxValue, setpoint));
+    m_basePID.SetSetpoint(std::max(armMinValue, std::min(armMaxValue, setpoint)));
+    m_basePID.SetF(calculateArmFGain(getArmSetpoint()));
 }
 
 void Arm::setWristSetpoint(double setpoint) {
-    m_calibration = true;
-
-    m_wristSetpoint = std::max(wristMinValue, std::min(wristMaxValue, setpoint));
+    m_wristPID.SetSetpoint(std::max(wristMinValue, std::min(wristMaxValue, setpoint)));
 }
 
 void Arm::setEnabled(bool enabled) {
@@ -144,7 +145,6 @@ bool isHatchLevel(Level level) {
 }
 
 void Arm::setLevel(Level level) {
-    m_calibration = false;
     m_wristRetract = false;
 
     if (m_finalLevel == level) {
@@ -156,7 +156,7 @@ void Arm::setLevel(Level level) {
     }
 
     // Prevent using hatch panels if it is certain that cargo is being picked up (doesn't always work, though)
-    if (!m_stopSwitch.Get() && level == Level::HatchLevel1 && level == Level::HatchLevel2 && level == Level::HatchLevel3) {
+    if (stopSwitchPressed() && isHatchLevel(level)) {
         return;
     }
 
@@ -171,7 +171,7 @@ void Arm::setLevel(Level level) {
     /* ============== DO NOT CHANGE: ARM RESTRICTION ===================================================================================================== */
     m_prevLevel = m_finalLevel;
 
-    if (signum(int(m_finalLevel) - int(Level::CargoFloorIntake)) != signum(int(level) - int(Level::CargoFloorIntake))) {
+    if (isCargoLevel(level) && signum(int(m_finalLevel) - int(Level::CargoFloorIntake)) != signum(int(level) - int(Level::CargoFloorIntake))) {
         std::cout << "special maneuver\n";
         m_level = Level::CargoFloorIntake;
     }
@@ -223,7 +223,7 @@ bool Arm::setpointReached() {
     }
 
     double currentArm = m_basePID.GetSetpoint();
-    double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+    double targetArm = getTargetArm();
 
     if (currentArm != targetArm) {
         return false;
@@ -241,21 +241,41 @@ void Arm::setMode(bool calibration) {
 }
 
 double Arm::getArmSetpoint() const {
-    return m_armSetpoint;
+    return m_basePID.GetSetpoint();
 }
 
 double Arm::getTargetWrist() {
     double targetWrist = WRIST_SENSOR_VALUES[static_cast< int >(m_level)];
 
-    if (m_level == Level::CargoLevel1 || m_level == Level::CargoLevel2 || m_level == Level::CargoLevel3 || m_level == Level::CargoShip) {
-        targetWrist = wristMaxValue;
+    if (!m_calibration) {
+        double change = Robot::m_input->getInput().rx * 0.001;
+
+        m_wristOffset += change;
+    }
+    else {
+        m_wristOffset = 0.0;
     }
 
-    return targetWrist;
+    return targetWrist + m_wristOffset;
+}
+
+double Arm::getTargetArm() {
+    double target = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+
+    if (!m_calibration) {
+        double change = Robot::m_input->getInput().ry * 0.001;
+
+        m_baseOffset += change;
+    }
+    else {
+        m_baseOffset = 0.0;
+    }
+
+    return target + m_baseOffset;
 }
 
 double Arm::getWristSetpoint() const {
-    return m_wristSetpoint;
+    return m_wristPID.GetSetpoint();
 }
 
 double Arm::updateWrist() {
@@ -273,7 +293,7 @@ double Arm::updateWrist() {
 
 bool Arm::doHalfSpeed() {
     double currentArm = m_basePID.GetSetpoint();
-    double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+    double targetArm = getTargetArm();
     bool halfSpeed = (m_level == Level::HatchLevel1);
     if (m_level == Level::CargoHome || m_level == Level::Home) {
         double level1 = BASE_SENSOR_VALUES[static_cast< int >(Level::CargoLevel1)];
@@ -284,7 +304,7 @@ bool Arm::doHalfSpeed() {
 
 double Arm::updateArm() {
     double currentArm = m_basePID.GetSetpoint();
-    double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+    double targetArm = getTargetArm();
     if (std::abs(targetArm - currentArm) < (arm_max_change / (1.0 + doHalfSpeed()))) {
         currentArm = targetArm;
     }
@@ -294,31 +314,27 @@ double Arm::updateArm() {
     return currentArm;
 }
 
+bool Arm::stopSwitchPressed() const {
+    return !m_stopSwitch.Get();
+}
+
 void Arm::Periodic() {
-    if (!m_stopSwitch.Get()) {
+    if (stopSwitchPressed()) {
         m_wristPID.SetOutputRange(0.0, wrist_upper_output_limit);
     }
     else {
         m_wristPID.SetOutputRange(wrist_lower_output_limit, wrist_upper_output_limit);
     }
 
-    if (m_calibration) {
-        double armLimitedSetpoint = std::max(armMinValue, std::min(armMaxValue, m_armSetpoint));
-        m_basePID.SetSetpoint(armLimitedSetpoint);
-        m_basePID.SetF(calculateArmFGain(armLimitedSetpoint));
-
-        double wristLimitedSetpoint = std::max(wristMinValue, std::min(wristMaxValue, m_wristSetpoint));
-        m_wristPID.SetSetpoint(wristLimitedSetpoint);
-    } else {
+    if (!m_calibration) {
         bool movingDown = m_prevLevel > Level::CargoFloorIntake && m_finalLevel <= Level::CargoFloorIntake;
         bool movingUp = m_prevLevel <= Level::CargoFloorIntake && m_finalLevel > Level::CargoFloorIntake;
-        double currentWrist = m_wristPID.GetSetpoint();
+        double currentWrist = getWristSetpoint();
         double targetWrist = getTargetWrist();
-        double currentArm = m_basePID.GetSetpoint();
-        double targetArm = BASE_SENSOR_VALUES[static_cast< int >(m_level)];
+        double currentArm = getArmSetpoint();
+        double targetArm = getTargetArm();
 
         if (movingUp) {
-            std::cout << "state: " << int(m_state) << "\n";
             if (isCargoLevel(m_finalLevel)) {
                 switch (m_state) {
                 case State::ArmHomeMove:
