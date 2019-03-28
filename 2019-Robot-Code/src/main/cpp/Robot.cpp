@@ -207,9 +207,9 @@ void Robot::RobotInit() {
   m_drivecam1 = frc::CameraServer::GetInstance()->StartAutomaticCapture("DriveCam1", 1);
   m_drivecam2 = frc::CameraServer::GetInstance()->StartAutomaticCapture("DriveCam2", 2);
 
-  m_jevois.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
-  m_drivecam1.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
-  m_drivecam2.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 20);
+  m_jevois.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 10);
+  m_drivecam1.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 10);
+  m_drivecam2.SetVideoMode(cs::VideoMode::kMJPEG, 160, 120, 10);
 
   std::cout << m_jevois.GetInfo().name << "\n";
   std::cout << m_drivecam1.GetInfo().name << "\n";

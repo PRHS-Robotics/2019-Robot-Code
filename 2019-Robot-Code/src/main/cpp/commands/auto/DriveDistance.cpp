@@ -36,7 +36,7 @@ double DriveDistance::averageEncoderValue() {
   temp += positions.second[2];
   temp /= 2.0;*/
 
-  temp = Robot::m_driveTrain->getEncoderPosition(true, 2);
+  temp = Robot::m_driveTrain->getEncoderPosition(true, 1);
 
   return temp;
 }
