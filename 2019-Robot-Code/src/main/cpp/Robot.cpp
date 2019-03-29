@@ -198,7 +198,7 @@ void Robot::RobotInit() {
   
   frc::SmartDashboard::PutData("Camera Switch", m_cameraSwitch.get());
 
-  m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
+  //m_input->getButton("ARM_CALIBRATE")->WhenPressed(m_calibrateArm.get());
   m_input->getButton("ALIGN")->WhenPressed(m_snapAngle.get());
 
   m_driveTrain->SetDefaultCommand(m_manualControl.get());
@@ -236,7 +236,7 @@ void Robot::RobotInit() {
 }
 
 void Robot::DisabledInit() {
-  m_calibrateArm->Start();
+  //m_calibrateArm->Start();
   
   m_lights->UpdateDutyCycle(0.0);
 }

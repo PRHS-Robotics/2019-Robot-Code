@@ -28,7 +28,7 @@ const double wrist_upper_output_limit = /* 0.15*/ 1.00;
 const double wrist_max_change = /*0.015*/0.010;
 
 const double armMinValue = 2.4;
-const double armMaxValue = 4.2;
+const double armMaxValue = 4.5;
 
 const double wristMinValue = 2.3;
 const double wristMaxValue = 3.2;
@@ -261,12 +261,14 @@ double Arm::getWristSetpoint() const {
 double Arm::updateWrist() {
     double currentWrist = m_wristPID.GetSetpoint();
     double targetWrist = getTargetWrist();
+
+    double speed = (m_level == Level::Home || m_level == Level::CargoHome) ? 0.75 : 1.0;
     
-    if (std::abs(targetWrist - currentWrist) < wrist_max_change) {
+    if (std::abs(targetWrist - currentWrist) < wrist_max_change * speed) {
         currentWrist = targetWrist;
     }
     else {
-        currentWrist += wrist_max_change * signum(targetWrist - currentWrist);
+        currentWrist += wrist_max_change * speed * signum(targetWrist - currentWrist);
     }
     return currentWrist;
 }

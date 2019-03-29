@@ -19,8 +19,8 @@ CalibrateArm::CalibrateArm(Input *input) :
 // Called just before this Command runs the first time
 void CalibrateArm::Initialize() {
   readValues();
-  Robot::m_arm->setArmSetpoint(m_baseSensorValues[0]);
-  Robot::m_arm->setWristSetpoint(m_wristSensorValues[0]);
+  Robot::m_arm->setArmSetpoint(Robot::m_arm->getSensorValues().first);
+  Robot::m_arm->setWristSetpoint(Robot::m_arm->getSensorValues().second);
   Robot::m_arm->setEnabled(true);
 }
 
