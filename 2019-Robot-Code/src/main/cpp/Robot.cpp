@@ -22,16 +22,9 @@ std::unique_ptr< Input > Robot::m_input{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
-std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
-std::unique_ptr< SpeedTest > Robot::m_speedTest{};
-std::unique_ptr< FollowPath > Robot::m_followPath{};
-std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatorDriveTrain{};
 std::unique_ptr< Manipulator > Robot::m_manipulator{};
 std::unique_ptr< Arm > Robot::m_arm{};
 
-std::unique_ptr< DriveUntil > Robot::m_driveUntil{};
-
-std::unique_ptr< ManualClimb > Robot::m_manualClimb{};
 
 std::unique_ptr< ManualManip > Robot::m_manualManip{};
 
@@ -48,13 +41,10 @@ std::unique_ptr< frc::SerialPort > Robot::m_cameraSerial{};
 std::unique_ptr< frc::AnalogInput > Robot::m_ultrasonic{};
 std::unique_ptr< frc::AnalogInput > Robot::m_ultrasonic2{};
 
-std::unique_ptr< LevelDriveUntil > Robot::m_levelDriveUntil{};
 
 std::unique_ptr< TurnToAngle > Robot::m_turnToAngle{};
 
 std::unique_ptr< DriveDistance > Robot::m_driveDistance{};
-
-std::unique_ptr< TapeRoughApproach > Robot::m_tapeRoughApproach{};
 
 std::unique_ptr< SnapAngle > Robot::m_snapAngle{};
 
@@ -100,7 +90,7 @@ double Robot::getHeading() {
 double Robot::ultrasonicDistance() {
   return std::min(ultrasonicDistance(0), ultrasonicDistance(0));
 }
-
+// Get distance from ultrasonic sensors
 double Robot::ultrasonicDistance(int sensor) {
   if (sensor) {
     return m_ultrasonic2->GetAverageVoltage() / (5.0 / 512.0);
@@ -111,27 +101,21 @@ double Robot::ultrasonicDistance(int sensor) {
 }
 
 void Robot::RobotInit() {
-  std::cout << "Hello, world\n";
-
+  //Drivetrain constructed with corresponding motor ports
   m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
+  //joysticks - port 0 for joystick, 1 for controller
   m_input = std::make_unique< Input >(0, 1);
 
   m_cameraSwitch = std::make_unique< frc::DigitalOutput >(2);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
-	m_approachCargo = std::make_unique< ApproachCargo >(10);
-	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
   m_arm = std::make_unique< Arm >(1, 0, 2, 1, 1);
-
-  //m_elevatorDriveTrain = std::make_unique< ElevatorDriveTrain >()
 
   m_lights = std::make_unique< frc::DigitalOutput >(9);
   m_lights->EnablePWM(0.0);
 
   m_manualArm = std::make_unique< ManualArm >(Robot::m_input.get());
-
-  //m_manualClimb = std::make_unique< ManualClimb >(Robot::m_input.get());
 
   m_manipulator = std::make_unique< Manipulator >(3, 0, 1, 0);
 
@@ -151,9 +135,8 @@ void Robot::RobotInit() {
   m_ultrasonic2 = std::make_unique< frc::AnalogInput >(5);
   m_ultrasonic2->SetAverageBits(8);
 
-  m_driveUntil = std::make_unique< DriveUntil >(40.0);
 
-  m_levelDriveUntil = std::make_unique< LevelDriveUntil >();
+
 
   m_turnToAngle = std::make_unique< TurnToAngle >(0.0);
 
@@ -163,38 +146,35 @@ void Robot::RobotInit() {
 
   m_hatchIntake = std::make_unique< HatchIntake >();
 
-  m_tapeRoughApproach = std::make_unique< TapeRoughApproach >(0.0, 0.0);
-
+  //---------------------SMART DASHBOARD OPTIONS-------------------------
+  // Competition mode enables every subsystem
   m_testModeChooser.SetDefaultOption("Competition Mode", 0);
   m_testModeChooser.AddOption("Test Mode", 1);
-
+  //Arm options - Wrist and Arm
   m_armChooser.SetDefaultOption("DisabledArm", 0);
   m_armChooser.AddOption("EnabledArm", 1);
   m_armChooser.AddOption("CalibrateArm", 2);
-
+  //Manipulator options (THis applies to ball intake and pistons only)
   m_manipulatorChooser.SetDefaultOption("DisabledManip", 0);
   m_manipulatorChooser.AddOption("EnabledManip", 1);
-
+  //Drivetrain options
   m_driveTrainChooser.SetDefaultOption("DisabledDrive", 0);
   m_driveTrainChooser.AddOption("EnabledDrive", 1);
-
+  //Compressor options
   m_pneumaticChooser.SetDefaultOption("DisabledCompressor", 0);
   m_pneumaticChooser.AddOption("EnabledCompressor", 1);
-  std::cout << "e\n";
-
+  
   frc::SmartDashboard::PutData("Mode Chooser", &m_testModeChooser);
   frc::SmartDashboard::PutData("Arm Chooser", &m_armChooser);
   frc::SmartDashboard::PutData("Manip Chooser", &m_manipulatorChooser);
   frc::SmartDashboard::PutData("Drive Chooser", &m_driveTrainChooser);
   frc::SmartDashboard::PutData("Pneumatic Chooser", &m_pneumaticChooser);
   
-  frc::SmartDashboard::PutData("Drive Until", m_driveUntil.get());
-  frc::SmartDashboard::PutData("Level Drive Until", m_levelDriveUntil.get());
   frc::SmartDashboard::PutData("Turn To Angle", m_turnToAngle.get());
   frc::SmartDashboard::PutData("Drive Distance", m_driveDistance.get());
-  frc::SmartDashboard::PutData("Tape Rough Approach", m_tapeRoughApproach.get());
+
   frc::SmartDashboard::PutData("Hatch Intake", m_hatchIntake.get());
-  //frc::SmartDashboard::PutData("Manual Climb", m_manualClimb.get());
+
   
   frc::SmartDashboard::PutData("Camera Switch", m_cameraSwitch.get());
 
@@ -259,10 +239,11 @@ void Robot::RobotPeriodic() {
 
   auto armSensors = m_arm->getSensorValues();
 
+  //Put Arm and Wrist Potentiometer Values on smart Dashboard
   frc::SmartDashboard::PutNumber("Arm Base Analog", armSensors.first);
   frc::SmartDashboard::PutNumber("Arm Wrist Analog", armSensors.second);
 
-
+  //Put ultrasonic sensor distances on smart dashboard
   frc::SmartDashboard::PutNumber("Ultrasonic", ultrasonicDistance());
   frc::SmartDashboard::PutNumber("Ultrasonic1", ultrasonicDistance(0));
   frc::SmartDashboard::PutNumber("Ultrasonic2", ultrasonicDistance(1));
@@ -345,10 +326,12 @@ void Robot::matchInit() {
   }
 
   if (m_cameraSerial) {
+    //--Commented out to save cycles sending serial data to a disconnected camera--
+
     // setcam autoexp 1\nsetcam absexp 10\n
-    std::cout << "Writing\n";
-    const char buf[] = "setlower 65 150 30\nsetupper 105 255 255\nsetcam autowb 0\nsetcam autogain 0\nsetcam gain 16\nsetcam redbal 110\nsetcam bluebal 130\nsetcam autoexp 1\nsetcam absexp 15\nsetpar serout All\n";
-    m_cameraSerial->Write(buf, sizeof(buf));
+    //std::cout << "Writing\n";
+    //const char buf[] = "setlower 65 150 30\nsetupper 105 255 255\nsetcam autowb 0\nsetcam autogain 0\nsetcam gain 16\nsetcam redbal 110\nsetcam bluebal 130\nsetcam autoexp 1\nsetcam absexp 15\nsetpar serout All\n";
+    //m_cameraSerial->Write(buf, sizeof(buf));
   }
 }
 

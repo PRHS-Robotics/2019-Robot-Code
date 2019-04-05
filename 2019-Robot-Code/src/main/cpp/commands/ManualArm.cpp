@@ -44,7 +44,7 @@ Level getLevel(Input *input) {
 
     if (Robot::m_manipulator->hasCargo()) {
         if (Robot::m_arm->getLevel() == Level::CargoFloorIntake) {
-            return Level::CargoShip;
+            return Level::CargoHome;
         }
     }
     else if (buttonValue(input->getInput(), "ARM_CARGO_INTAKE")) {

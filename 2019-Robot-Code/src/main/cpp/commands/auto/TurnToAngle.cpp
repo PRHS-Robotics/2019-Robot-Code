@@ -9,7 +9,7 @@
 #include "Robot.h"
 #include <iostream>
 #include <algorithm>
-#include <SmartDashboard/SmartDashboard.h>
+#include <frc/smartDashboard/SmartDashboard.h>
 
 const double maxTurnPower = 0.5;
 

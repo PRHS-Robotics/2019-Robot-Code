@@ -6,13 +6,11 @@
 /*----------------------------------------------------------------------------*/
 
 #include "commands/auto/HatchIntake.h"
-#include "commands/auto/DriveUntil.h"
+
 #include "commands/auto/SetLevel.h"
 #include "commands/auto/DriveDistance.h"
 
 HatchIntake::HatchIntake() {
-  //AddSequential(new SetLevel(Level::HatchLevel1));
-  //AddSequential(new DriveUntil(15.375));
   AddParallel(new SetLevel(Level::HatchLevel2));
   AddSequential(new DriveDistance(-0.5));
 
